@@ -1,9 +1,6 @@
 package CatanSpring.model.gestioFitxers;
 
-import CatanSpring.model.Aresta;
-import CatanSpring.model.Hexagon;
-import CatanSpring.model.HexagonVertex;
-import CatanSpring.model.Vertex;
+import CatanSpring.catan.model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,0 +1,92 @@
+package CatanSpring.catan.model;
+
+import CatanSpring.model.enums.TipusRecurs;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.Objects;
+
+@Entity
+@Table(name="recursJugador", uniqueConstraints = @UniqueConstraint(columnNames = {"id_jugador","tipus_jugador"}))
+
+public class RecursJugador {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="id_recurs_jugador",nullable=false, unique=true)
+	private Integer id;
+	
+	@NotNull
+	@Column(name="tipus_jugador",nullable=false, length=20)
+	@Enumerated(EnumType.STRING)
+	private TipusRecurs tipus;
+	
+	@NotNull
+	@Column(name="quantitat_jugador",nullable=false)
+	private Integer quantitat;
+	
+	@ManyToOne(fetch = FetchType.EAGER, optional = false)
+	@JoinColumn(name = "id_jugador")
+	private Jugador jugador;
+	
+	public RecursJugador() {
+		
+	}
+	
+	public RecursJugador(TipusRecurs tipus, Integer quantitat) {
+		this.tipus = tipus;
+		this.quantitat = quantitat;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public TipusRecurs getTipus() {
+		return tipus;
+	}
+
+	public void setTipus(TipusRecurs tipus) {
+		this.tipus = tipus;
+	}
+
+	public Integer getQuantitat() {
+		return quantitat;
+	}
+
+	public void setQuantitat(Integer quantitat) {
+		this.quantitat = quantitat;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, quantitat, tipus);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RecursJugador other = (	RecursJugador) obj;
+		return Objects.equals(id, other.id) && Objects.equals(quantitat, other.quantitat) && tipus == other.tipus;
+	}
+
+	@Override
+	public String toString() {
+		return "RecursJugador [id=" + id + ", tipus=" + tipus + ", quantitat=" + quantitat + "]";
+	}
+	
+	
+	
+	
+	
+	
+}
