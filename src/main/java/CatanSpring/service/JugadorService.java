@@ -21,14 +21,14 @@ public class JugadorService {
 	// } --> Una alternativa
 	
 	
-	public List</*Classe*/> lista(){
-		return repo.findAll();
-	}
+	//public List</*Classe*/> lista(){
+	//	return repo.findAll();
+	//}
 	
 	
-	public Optional</*nom_classe*/> buscar(Long id){
-		return repo.findById(id);
-	}
+	//public Optional</*nom_classe*/> buscar(Long id){
+	//	return repo.findById(id);
+	//}
 	
 	
 }
