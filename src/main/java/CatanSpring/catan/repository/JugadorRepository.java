@@ -10,8 +10,9 @@ import CatanSpring.catan.model.*;
 //Cambiar el Jugador repository por classe en CatanSpring.models
 
 //NO PONER ETIQUETA, YA HEREDA DE JPAREPOSITORY
+// JpaRepository ja proporciona findById(), save(), delete(), etc.
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
-	
+
 	 @Query(name = "Jugador.buscarRecursos")  // reutilizem la namedQuery creada a Hibernate i simplement la cridem al metode
 	 List<RecursJugador> llistarRecursos(@Param("id") int idJugador);
 }
