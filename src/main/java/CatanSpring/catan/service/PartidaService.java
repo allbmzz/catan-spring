@@ -1,5 +1,7 @@
 package CatanSpring.catan.service;
 
+import CatanSpring.catan.dto.JugadorRequest.PartidaRequest;
+import CatanSpring.catan.dto.PartidaResponse;
 import CatanSpring.catan.repository.PartidaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,11 @@ public class PartidaService {
 
 	@Autowired 
 	private PartidaRepository repo;
+
+	public PartidaResponse iniciarPartida(PartidaRequest request) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	//public PartidaService(PartidaRepository repo) {
 	//	this.repo = repo;

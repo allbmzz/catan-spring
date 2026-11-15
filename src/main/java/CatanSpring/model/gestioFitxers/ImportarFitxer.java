@@ -16,7 +16,8 @@ public class ImportarFitxer {
 		HashSet<Aresta> arestes = new HashSet<>();
 		HashSet<HexagonVertex> hexagonVertexs = new HashSet<>();
 
-		InputStream is = ImportarFitxer.class.getResourceAsStream(fitxerCVS);
+		String ruta = fitxerCVS.startsWith("/") ? fitxerCVS : "/" + fitxerCVS;
+		InputStream is = ImportarFitxer.class.getResourceAsStream(ruta);
 		if (is == null) {
 			System.out.println("No s'ha trobat el fitxer: " + fitxerCVS);
 			return null;

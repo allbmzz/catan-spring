@@ -14,19 +14,24 @@ import CatanSpring.model.enums.EstatPartida;
 
 public record PartidaResponse(Integer id, EstatPartida estat, int puntsPerGuanyar, List<JugadorResponse> jugadors, List<HexagonResponse> hexagons) {
 
+	
 	public static PartidaResponse de(Partida p, List<Jugador> jugadors, List<Hexagon> hexagons) {
-		List<JugadorResponse> jugadorsList = new ArrayList<>();
-	    
 		//Creem els jugadors dins d'un bucle per a poder assignar el torn de forma ordenada.
-		for (Jugador j : jugadors) {
-	        jugadorsList.add(JugadorResponse.de(j));
-	    }
+		List<JugadorResponse> jugadorsList = new ArrayList<>();
+		if (jugadors != null) {
+			for (Jugador j : jugadors) {
+				jugadorsList.add(JugadorResponse.de(j));
+			}
+		}
 
-		//Els hexàgons es llegeixen línia a línia en el fitxer CSV, doncs ja mantenen aquest ordre del fitxer.
-	    List<HexagonResponse> hexagonsList = new ArrayList<>();
-	    for (Hexagon h : hexagons) {
-	        hexagonsList.add(HexagonResponse.de(h));
-	    }
+		List<HexagonResponse> hexagonsList = new ArrayList<>();
+		if (hexagons != null) {
+			for (Hexagon h : hexagons) {
+				// Ajusta aquesta condició segons si p.getLladre() és un Hexagon o una entitat Lladre
+				boolean teLladre = (p.getLladre() != null && p.getLladre().equals(h));
+				hexagonsList.add(HexagonResponse.de(h, teLladre));
+			}
+		}
 
 	    return new PartidaResponse(
 	        p.getId(),
