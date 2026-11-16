@@ -53,6 +53,10 @@ public class Vertex {
 		this.codi = codi;
 	}
 
+	public Integer getCodi() {
+		return codi;
+	}
+
 	public Partida getPartida_id() {
 		return partida_id;
 	}

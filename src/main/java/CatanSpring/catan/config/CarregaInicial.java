@@ -9,31 +9,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class CarregaInicial implements CommandLineRunner {
     //Aqui va la funcó que crida als csvs
-    //@Autowired
-    //private PartidaService service;
+    @Autowired
+    private PartidaService service;
 
-    //@Autowired
-    //private PartidaRepository pRepository;
+    @Autowired
+    private PartidaRepository pRepository;
 
 	@Override
 	public void run(String... args) throws Exception {
-		// TODO Auto-generated method stub
+		//Mira si la BBDD ja té registres, si ja en té no carrega els CSVs
+		if (pRepository.count() > 0) {
+			System.out.println("La BD ja té dades: no es carreguen els CSV");
+			return;
+		}
+		//Comprovar com cal afegir els elements del CSV, el taulell s'hauria de carregar amb la partida ja creada o durant la creació, no abans.
+		//int n = service.carregarDades();
+		//System.out.println("Taulell carregat dels CSV: " + n);
 		
 	}
-   // @Autowired
-    //private JugadorService service;
-
-    //@Autowired
-   // private JugadorRepository pRepository;
-
-//    @Override
-//    public void run(String... args) throws Exception {
-//        if (pRepository.count() > 0) {
-//            System.out.println("La BD ja té dades: no es carreguen els CSV");
-//            return;
-//        }
-//        int n = service.carregarDades();
-//        System.out.println("Videojoc carregats dels CSV: " + n);
-//    }
-
 }
