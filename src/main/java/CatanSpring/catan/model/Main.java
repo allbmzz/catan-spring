@@ -1,23 +1,11 @@
 package CatanSpring.catan.model;
 
-import CatanSpring.model.*;
-import CatanSpring.model.enums.*;
-import CatanSpring.model.gestioFitxers.ImportarFitxer;
-import org.hibernate.HibernateException;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-
-import java.time.LocalDate;
 import java.util.*;
 
 
 public class Main {
 	
 	private static Scanner scanner=new Scanner(System.in);;
-
-	public static void main(String args[]) {
-
-	}
 
 	//============================
 	//          Scanners

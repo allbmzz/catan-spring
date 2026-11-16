@@ -17,7 +17,8 @@ public class PartidaService {
 	private PartidaRepository repo;
 
 	public PartidaResponse iniciarPartida(PartidaRequest request) {
-		// TODO Auto-generated method stub
+
+		
 		return null;
 	}
 	
