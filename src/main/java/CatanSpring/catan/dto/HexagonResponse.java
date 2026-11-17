@@ -6,17 +6,13 @@ import java.util.List;
 import CatanSpring.catan.model.*;
 import CatanSpring.model.enums.TipusTerreny;
 
-public record HexagonResponse(
-        Integer id,
-        Integer codi,
-        TipusTerreny terreny,
-        Integer numero,
-        Integer q,
-        Integer r,
-        boolean lladre,
-        List<ConstruccioResponse> construccions
-) {
-    public static HexagonResponse de(Hexagon h, boolean lladre) {
+public record HexagonResponse(Integer id, TipusTerreny terreny, Integer numero) {
+	
+	
+    
+	public static HexagonResponse de(Hexagon h) {
+		
+		/*
         List<ConstruccioResponse> construccions = new ArrayList<>();
 
         // Recorrer els vèrtexs per obtenir les construccions de cada hexàgon
@@ -28,17 +24,12 @@ public record HexagonResponse(
                 construccions.add(ConstruccioResponse.de(hv, a));
             }
         }
-
+		 */
         // Retornem només les dades necessàries per al JSON, sense exposar entitats JPA
         return new HexagonResponse(
                 h.getId(),
-                h.getCodi(),
                 h.getTerreny(),
-                h.getNumero(),
-                h.getQ(),
-                h.getR(),
-                lladre,
-                construccions
+                h.getNumero()
         );
     }
 }
