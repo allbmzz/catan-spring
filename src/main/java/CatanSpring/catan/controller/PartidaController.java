@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/partida")
@@ -51,12 +52,12 @@ public class PartidaController {
 		PartidaResponse response = partidaService.iniciarPartida(request);
 		// Retornem el codi 201 Created juntament amb el cos de la resposta (PartidaResponse)
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+	}1
 	
 	*/
 	
 	@PostMapping
-	public ResponseEntity<PartidaResponse> iniciarPartida(@RequestParam List<String> nomsJugadors, @RequestParam int puntsPerGuanyar) {
+	public ResponseEntity<PartidaResponse> iniciarPartida(@RequestParam Set<String> nomsJugadors, @RequestParam int puntsPerGuanyar) {
 		
 		return partidaService.iniciarPartida(nomsJugadors, puntsPerGuanyar);
 	}

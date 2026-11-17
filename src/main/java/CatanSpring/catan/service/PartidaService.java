@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -41,8 +42,10 @@ public class PartidaService {
 	@Autowired 
 	private PartidaRepository repo;
 	
+	// FALTA IMPORTAR LOS CSVS A LA BASE DE DATOS
+	
 	@Transactional
-	public ResponseEntity<PartidaResponse> iniciarPartida(List<String> nomsJugadors, int puntsPerGuanyar) {
+	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
 		
 		EstatPartida estat=EstatPartida.PREPARACIO;
 		LocalDate dataInici= LocalDate.now();
@@ -61,7 +64,9 @@ public class PartidaService {
 		
 		prepararCartes(partida);
 		
-		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partida.getId()).body(partida);
+		System.out.println(partida.getHexagons());
+		
+		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partida.getId()).body(PartidaResponse.de(partida));
 	
 	}
 	
@@ -98,8 +103,9 @@ public class PartidaService {
 		partida.setPilaCartes(pila);
 	}
 	
-	public void prepararJugadors(List<String> nomsJugadors, Partida partida) {
-		Collections.shuffle(nomsJugadors);
+	public void prepararJugadors(Set<String> nomsJugadors, Partida partida) {
+		List<String> jugadorsBarrejats = new ArrayList<>(nomsJugadors);
+		Collections.shuffle(jugadorsBarrejats);
 		int ordreJugador=0;
 		for (String nom:nomsJugadors){
 			ColorJugador color = ColorJugador.values()[ordreJugador];
@@ -182,12 +188,6 @@ public class PartidaService {
 		}
 	}
 	
-
-	public PartidaResponse iniciarPartida(PartidaRequest request) {
-
-		
-		return null;
-	}
 	
 	//public PartidaService(PartidaRepository repo) {
 	//	this.repo = repo;

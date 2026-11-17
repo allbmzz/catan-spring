@@ -31,7 +31,7 @@ public class Vertex {
 	private HashSet<Aresta> arestesB;
 
 	@OneToMany(mappedBy = "vertex")
-	private HashSet<HexagonVertex> hexagonVertex;
+	private HashSet<HexagonVertex> hexagonVertex = new HashSet<>();
 	
 	@OneToOne(mappedBy = "vertex")
 	private Assentament assentament;
