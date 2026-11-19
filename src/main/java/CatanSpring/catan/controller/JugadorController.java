@@ -23,6 +23,6 @@ public class JugadorController {
 			@PathVariable Long idJugador) {
 
 		// Si existeix retorna 200 OK; si no, retorna 404 NOT FOUND
-		return serv.llistarRecursos(idJugador).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+		return serv.mostrarRecursos(idJugador).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 	}
 }

@@ -1,37 +1,26 @@
 package CatanSpring.catan.dto;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 
-import CatanSpring.catan.model.*;
-import CatanSpring.model.enums.ColorJugador;
+import CatanSpring.catan.model.Jugador;
+import CatanSpring.catan.model.RecursJugador;
 import CatanSpring.model.enums.TipusRecurs;
 
-//Aqui hem de posar les dades que volem que surtin al JSON de resposta.
-
-// --> 
-
-//No necessaria para la práctica, pero para el examen si.
-public record JugadorResponse (Integer id, String nom){
+public record JugadorResponse(
+		Integer id,
+		String nom,
+		Map<TipusRecurs, RecursJugadorResponse> inventari
+) {
 
 	public static JugadorResponse de(Jugador j) {
-		
-		/*
-			// Creem un mapa simple per no posar entitats RecursJugador. 
-			Map<TipusRecurs, Integer> inventari = new HashMap<>();
 
-			// Recorrem els recursos del jugador i n'extraiem només el tipus i la quantitat
-	        for (RecursJugador recurs : j.getInventari().values()) {
-	            inventari.put(recurs.getTipus(), recurs.getQuantitat());
-	        }
-	   */
-	        
-	     // Construïm i retornem el DTO només amb les dades simples que aniran al JSON
-	        return new JugadorResponse(j.getId(), j.getNom());
-	
+		Map<TipusRecurs, RecursJugadorResponse> inventari = new HashMap<>();
+
+		for (Map.Entry<TipusRecurs, RecursJugador> entrada : j.getInventari().entrySet()) {
+			inventari.put(entrada.getKey(), RecursJugadorResponse.de(entrada.getValue()));
+		}
+
+		return new JugadorResponse(j.getId(), j.getNom(), inventari);
 	}
-
-
-
-	
 }

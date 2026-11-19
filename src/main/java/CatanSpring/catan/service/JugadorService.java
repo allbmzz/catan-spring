@@ -20,11 +20,9 @@ public class JugadorService {
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<JugadorResponse> llistarRecursos(Long idJugador) {
-
+	public Optional<JugadorResponse> mostrarRecursos(Long idJugador) {
 		// Busquem el jugador i el transformem a DTO si existeix
 		// Així evitem retornar directament l'entitat JPA
-		return repo.findById(idJugador)
-				.map(JugadorResponse::de);
+		return repo.findById(idJugador).map(JugadorResponse::de);
 	}
 }

@@ -43,10 +43,12 @@ public class PartidaService {
 	private PartidaRepository repo;
 	
 	// FALTA IMPORTAR LOS CSVS A LA BASE DE DATOS
-	
+
 	@Transactional
 	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
-		
+		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 || puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 		EstatPartida estat=EstatPartida.PREPARACIO;
 		LocalDate dataInici= LocalDate.now();
 		int ronda=0;
@@ -58,19 +60,19 @@ public class PartidaService {
 		Partida partida = new Partida(estat,dataInici,ronda,ultimaTirada,puntsPerGuanyar,dausTirats,lladrePendent);
 		//assignar taulell a la partida
 		crearTaulell(partida);
-	
+
 		//Barrejar noms, assignar colors i ordre
 		prepararJugadors(nomsJugadors,partida);
-		
+
 		prepararCartes(partida);
 
 		// Guardar la partida y todas sus relaciones
 		Partida partidaGuardada = repo.save(partida);
-		
+
 		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partida.getId()).body(PartidaResponse.de(partida));
-	
+
 	}
-	
+
 	public void prepararCartes(Partida partida) {
 		List<CartaDesenvolupament> pila = new ArrayList<>();
 		
@@ -188,22 +190,23 @@ public class PartidaService {
 			a.setPartida_id(partida);
 		}
 	}
-	
-	
+
+
+
 	//public PartidaService(PartidaRepository repo) {
 	//	this.repo = repo;
 	// } --> Una alternativa
-	
-	
+
+
 
 	//public List</*Classe*/> lista(){
 	//	return repo.findAll();
 	//}
-	
+
 
 	//public Optional</*nom_classe*/> buscar(Long id){
 	//	return repo.findById(id);
 		//}
-	
+
 
 }
