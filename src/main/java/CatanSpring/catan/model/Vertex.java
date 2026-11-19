@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 @Entity
@@ -15,23 +16,23 @@ public class Vertex {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, unique=true)
-	private Integer id; // no hauria de ser Integer? o es int perque pot ser null? -> si, ha de ser Integer sinò no pot ser null
-	
+	private Integer id;
+
 	@Column(name = "codi", nullable = false, unique = true)
-	private Integer codi; // no hauria de ser Integer? o es int perque pot ser null? -> si, ha de ser Integer sinò no pot ser null
-	
+	private Integer codi;
+
 	@ManyToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(name = "partida_id")
 	private Partida partida_id;
 	
 	@OneToMany(mappedBy="vertexA", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	private HashSet<Aresta> arestesA;
+	private Set<Aresta> arestesA;
 	
 	@OneToMany(mappedBy="vertexB", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	private HashSet<Aresta> arestesB;
+	private Set<Aresta> arestesB;
 
 	@OneToMany(mappedBy = "vertex")
-	private HashSet<HexagonVertex> hexagonVertex = new HashSet<>();
+	private Set<HexagonVertex> hexagonVertex = new HashSet<>();
 	
 	@OneToOne(mappedBy = "vertex")
 	private Assentament assentament;
@@ -65,27 +66,27 @@ public class Vertex {
 		this.partida_id = partida_id;
 	}
 
-	public HashSet<Aresta> getArestesA() {
+	public Set<Aresta> getArestesA() {
 		return arestesA;
 	}
 
-	public void setArestesA(HashSet<Aresta> arestesA) {
+	public void setArestesA(Set<Aresta> arestesA) {
 		this.arestesA = arestesA;
 	}
 
-	public HashSet<Aresta> getArestesB() {
+	public Set<Aresta> getArestesB() {
 		return arestesB;
 	}
 
-	public void setArestesB(HashSet<Aresta> arestesB) {
+	public void setArestesB(Set<Aresta> arestesB) {
 		this.arestesB = arestesB;
 	}
 
-	public HashSet<HexagonVertex> getHexagonVertex() {
+	public Set<HexagonVertex> getHexagonVertex() {
 		return hexagonVertex;
 	}
 
-	public void setHexagonVertex(HashSet<HexagonVertex> hexagonVertex) {
+	public void setHexagonVertex(Set<HexagonVertex> hexagonVertex) {
 		this.hexagonVertex = hexagonVertex;
 	}
 

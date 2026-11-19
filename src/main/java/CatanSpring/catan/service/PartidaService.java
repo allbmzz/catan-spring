@@ -63,8 +63,9 @@ public class PartidaService {
 		prepararJugadors(nomsJugadors,partida);
 		
 		prepararCartes(partida);
-		
-		System.out.println(partida.getHexagons());
+
+		// Guardar la partida y todas sus relaciones
+		Partida partidaGuardada = repo.save(partida);
 		
 		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partida.getId()).body(PartidaResponse.de(partida));
 	
