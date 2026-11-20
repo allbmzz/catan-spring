@@ -7,7 +7,7 @@ import CatanSpring.catan.model.Partida;
 //Cambiar el Jugador repository por classe en CatanSpring.models
 
 //NO PONER ETIQUETA, YA HEREDA DE JPAREPOSITORY
-public interface PartidaRepository extends JpaRepository<Partida, Long> {
+public interface PartidaRepository extends JpaRepository<Partida, Integer> {
 	
 	
 	
