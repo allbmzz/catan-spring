@@ -1,6 +1,5 @@
 package CatanSpring.catan.service;
 
-import CatanSpring.catan.dto.JugadorRequest.PartidaRequest;
 import CatanSpring.catan.model.Aresta;
 import CatanSpring.catan.model.CartaDesenvolupament;
 import CatanSpring.catan.model.Hexagon;
@@ -20,7 +19,6 @@ import CatanSpring.model.gestioFitxers.ImportarFitxer;
 import CatanSpring.catan.dto.TaulerHexagonResponse;
 import CatanSpring.catan.repository.HexagonRepository;
 
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 
@@ -48,9 +45,9 @@ public class PartidaService {
 
 	@Transactional
 	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
-		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 || puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
+//		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 || puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
+//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//		}
 		EstatPartida estat=EstatPartida.PREPARACIO;
 		LocalDate dataInici= LocalDate.now();
 		int ronda=0;
@@ -69,10 +66,10 @@ public class PartidaService {
 		prepararCartes(partida);
 
 		// Guardar la partida y todas sus relaciones
-		Partida partidaGuardada = repo.save(partida);
+		// Guardar la partida y todas sus relaciones
+		Partida partidaGuardada = repo.saveAndFlush(partida);
 
-		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partida.getId()).body(PartidaResponse.de(partida));
-
+		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partidaGuardada.getId()).body(PartidaResponse.de(partidaGuardada));
 	}
 
 	public void prepararCartes(Partida partida) {
@@ -112,7 +109,7 @@ public class PartidaService {
 		List<String> jugadorsBarrejats = new ArrayList<>(nomsJugadors);
 		Collections.shuffle(jugadorsBarrejats);
 		int ordreJugador=0;
-		for (String nom:nomsJugadors){
+		for (String nom:jugadorsBarrejats){
 			ColorJugador color = ColorJugador.values()[ordreJugador];
 			ordreJugador++;
 			Jugador jugador=new Jugador(nom,color,ordreJugador);
