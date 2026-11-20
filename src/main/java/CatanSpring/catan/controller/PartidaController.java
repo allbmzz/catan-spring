@@ -37,7 +37,7 @@ public class PartidaController {
 	
 	@Autowired
 	private PartidaService partidaService;
-	
+
 	
 	//Constructor. Injectarà automàticament la instància a partidaService.
 	public PartidaController(PartidaService partidaService) {
@@ -45,10 +45,10 @@ public class PartidaController {
 		this.partidaService = partidaService;
 		
 	}
-	
+	//ResponseEntity<?> està amb ? per evitar que mostri un element partida sense dades al retornar badRequest
 	@PostMapping
-	public ResponseEntity<PartidaResponse> iniciarPartida(@RequestParam Set<String> nomsJugadors, @RequestParam int puntsPerGuanyar) {
-		
+	public ResponseEntity<?> iniciarPartida(@RequestParam Set<String> nomsJugadors, @RequestParam int puntsPerGuanyar) {
+
 		return partidaService.iniciarPartida(nomsJugadors, puntsPerGuanyar);
 	}
 	

@@ -40,20 +40,17 @@ public class PartidaService {
 
 	@Autowired 
 	private PartidaRepository repo;
-	
-	// FALTA IMPORTAR LOS CSVS A LA BASE DE DATOS
 
 	@Transactional
 	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
-//		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 || puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
-//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//		}
+		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 || puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
+			return ResponseEntity.badRequest().build();
+		}
 		EstatPartida estat=EstatPartida.PREPARACIO;
 		LocalDate dataInici= LocalDate.now();
+		//les rondes augmenten per jugador o per cada volta de jugadors???
 		int ronda=0;
 		int ultimaTirada=0;
-		//System.out.print("Introdueix la quantitat de punts per guanyar: ");
-		//int puntsPerGuanyar=getInt(1,100);
 		boolean dausTirats=false;
 		boolean lladrePendent=false;
 		Partida partida = new Partida(estat,dataInici,ronda,ultimaTirada,puntsPerGuanyar,dausTirats,lladrePendent);
@@ -62,11 +59,12 @@ public class PartidaService {
 
 		//Barrejar noms, assignar colors i ordre
 		prepararJugadors(nomsJugadors,partida);
-
 		prepararCartes(partida);
 
-		// Guardar la partida y todas sus relaciones
-		// Guardar la partida y todas sus relaciones
+		//Selecciona el primer jugador com al torn actual
+		partida.setActiu(partida.getJugadors().stream().findFirst().orElse(null));
+
+		// Guardar la partida i totes les seves realcions
 		Partida partidaGuardada = repo.saveAndFlush(partida);
 
 		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partidaGuardada.getId()).body(PartidaResponse.de(partidaGuardada));
