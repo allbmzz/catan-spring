@@ -44,18 +44,6 @@ public class PartidaController {
 		
 	}
 	
-	/*
-	// L'endpoint per a poder realitzar una nova partida.
-	@PostMapping
-	public ResponseEntity<PartidaResponse> crearPartida(@RequestBody PartidaRequest request){
-		// Deleguem tota la lògica de negoci i la transacció de BD a la capa de servei --> Per aixó utilitzem el mètode iniciarPartida, allotjat en PartidaService
-		PartidaResponse response = partidaService.iniciarPartida(request);
-		// Retornem el codi 201 Created juntament amb el cos de la resposta (PartidaResponse)
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}1
-	
-	*/
-	
 	@PostMapping
 	public ResponseEntity<PartidaResponse> iniciarPartida(@RequestParam Set<String> nomsJugadors, @RequestParam int puntsPerGuanyar) {
 		

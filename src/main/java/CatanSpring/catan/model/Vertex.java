@@ -1,6 +1,5 @@
 package CatanSpring.catan.model;
 
-
 import CatanSpring.catan.model.*;
 import jakarta.persistence.*;
 
@@ -8,41 +7,43 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-
 @Entity
-@Table(name = "vertex")
+@Table(
+		name = "vertex",
+		uniqueConstraints = {
+				@UniqueConstraint(columnNames = {"partida_id", "codi"})
+		}
+)
 public class Vertex {
-		
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false, unique=true)
+	@Column(name = "id", nullable = false, unique = true)
 	private Integer id;
 
-	@Column(name = "codi", nullable = false, unique = true)
+	@Column(name = "codi", nullable = false)
 	private Integer codi;
 
 	@ManyToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(name = "partida_id")
 	private Partida partida_id;
-	
+
 	@OneToMany(mappedBy="vertexA", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Aresta> arestesA;
-	
+
 	@OneToMany(mappedBy="vertexB", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Aresta> arestesB;
 
 	@OneToMany(mappedBy = "vertex")
 	private Set<HexagonVertex> hexagonVertex = new HashSet<>();
-	
+
 	@OneToOne(mappedBy = "vertex")
 	private Assentament assentament;
-	
-	// constructor hibernate
+
 	public Vertex() {
 	}
-	
-	// constructor import i DAO
-	public Vertex (int codi) { // l'id es autogenerat, no s'ha de ficar al constructor
+
+	public Vertex(int codi) {
 		this.codi = codi;
 	}
 
@@ -50,12 +51,12 @@ public class Vertex {
 		this.id = id;
 	}
 
-	public void setCodi(Integer codi) {
-		this.codi = codi;
-	}
-
 	public Integer getCodi() {
 		return codi;
+	}
+
+	public void setCodi(Integer codi) {
+		this.codi = codi;
 	}
 
 	public Partida getPartida_id() {
@@ -107,12 +108,11 @@ public class Vertex {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (obj == null || getClass() != obj.getClass())
 			return false;
 		Vertex other = (Vertex) obj;
-		return codi == other.codi && id == other.id;
+		return Objects.equals(codi, other.codi)
+				&& Objects.equals(id, other.id);
 	}
 
 	@Override
