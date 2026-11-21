@@ -25,4 +25,25 @@ public class JugadorController {
 		// Si existeix retorna 200 OK; si no, retorna 404 NOT FOUND
 		return serv.mostrarRecursos(idJugador).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 	}
+	
+	
+	/*
+	 * 
+	 * PASSAR TORN I CONSTRUIR
+	 * 
+	@PostMapping("/{idJugador/passar")
+	public ResponseEntity<String> passarTorn(@PathVariable Long idJugador, @RequestBody ConstruccioRequest request) {
+		String resultat = serv.passarTorn(idJugador);
+		
+		return ResponseEntity.ok(resultat);	
+	}
+	
+	@PostMapping("/{idJugador/construir")
+	public ResponseEntity<String> construir(@PathVariable Long idJugador) {
+		String resultat = serv.construir(idJugador);
+		
+		return ResponseEntity.ok(resultat);
+	}
+	
+	*/
 }

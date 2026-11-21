@@ -40,8 +40,6 @@ public class PartidaService {
 
 	@Autowired 
 	private PartidaRepository repo;
-	
-	// FALTA IMPORTAR LOS CSVS A LA BASE DE DATOS
 
 	@Transactional
 	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
