@@ -1,6 +1,7 @@
 
 package CatanSpring.catan.controller;
 
+import CatanSpring.catan.dto.ConstruccioRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,17 +28,17 @@ public class JugadorController {
 	}
 	
 	
-	/*
-	 * 
-	 * PASSAR TORN I CONSTRUIR
-	 * 
-	@PostMapping("/{idJugador/passar")
-	public ResponseEntity<String> passarTorn(@PathVariable Long idJugador, @RequestBody ConstruccioRequest request) {
+
+	@PostMapping("/{idJugador}/passar")
+	public ResponseEntity<String> passarTorn(@PathVariable Long idJugador/*, @RequestBody ConstruccioRequest request*/) {
 		String resultat = serv.passarTorn(idJugador);
 		
 		return ResponseEntity.ok(resultat);	
 	}
-	
+	/*
+	 *
+	 * CONSTRUIR
+	 *
 	@PostMapping("/{idJugador/construir")
 	public ResponseEntity<String> construir(@PathVariable Long idJugador) {
 		String resultat = serv.construir(idJugador);

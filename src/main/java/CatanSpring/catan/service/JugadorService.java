@@ -33,75 +33,133 @@ public class JugadorService {
 	
 	
 	
-	/*
-	 * 
-	 * PASSAR TORN I CONSTRUIR
-	 * 
+
 	@Transactional
 	public String passarTorn(Long idJugador) {
 		
 		Jugador jugador = repo.findById(idJugador).orElse(null);
 		
 		if (jugador == null) { 
-			return "No s'ha trobat el jugador";
+			return "No s'ha trobat el jugador de id " + idJugador;
 		}
-		
-		// Rebutjar si la partida ha finalitzat
 		Partida partida = jugador.getPartida_id();
-		if (partida == null) { 
-			return "No s'ha trobat la partida"; 
-		} else {
-			if (partida.getEstatPartida().equals(EstatPartida.EN_CURS)) {
-				
-				// Comprovacions de seguretat. Si encara es el torn del jugador
-				if (partida.getActiu() == null || !partida.getActiu().getId().equals(idJugador.intValue())) {  // com que idJugador es un Long i el metode getId retorna un integer, fem un cast a idJugador
-					return "Encara no es el torn del jugador"; 
+
+
+		// Rebutjar no es troba la partida o la partida no conté al jugador (doble verificació)
+		if (partida == null || !partida.getJugadors().contains(jugador)) {
+			return "No s'ha trobat la partida d'aquest jugador";
+
+			//Rebutjar una partida ja finalitzada
+		} else if (partida.getEstatPartida().equals(EstatPartida.FINALITZADA)) {
+			return "La partida d'aquest jugador ja ha finalitzat";
+
+		} else if (partida.getEstatPartida().equals(EstatPartida.EN_CURS)){
+
+			// Comprovacions de seguretat. Si encara és el torn del jugador
+			if (partida.getActiu() == null || !partida.getActiu().equals(jugador)) {
+				return "Encara no es el torn del jugador";
+			}
+
+			// Comprovacions de seguretat. Si no s'han tirat els daus prèviament
+			if (!partida.isDausTirats()) {
+				return "Encara no s'han tirat els daus";
+			}
+
+			// Calcular el següent torn
+			int seguentTorn = jugador.getOrdreTorn() + 1;
+
+			// Quan hagin passat tots els jugadors, tornem al primer i incrementem la ronda
+			if (seguentTorn > partida.getJugadors().size()) {
+				seguentTorn = 1;
+				partida.setRonda(partida.getRonda() + 1);
+			}
+
+			// Assignar el nou jugador actiu amb un bucle
+			for (Jugador j : partida.getJugadors()) {
+				if (j.getOrdreTorn() == seguentTorn) {
+					partida.setActiu(j);
+					break;
 				}
-				
-				// Comprovacions de seguretat. Si no s'han tirat els daus prèviament.
-				if(!partida.isDausTirats()) {
-					return "Encara no s'ha tirat els daus";
+			}
+
+			// Reiniciar els daus per al següent jugador
+			partida.setDausTirats(false);
+
+		} else if (partida.getEstatPartida().equals(EstatPartida.PREPARACIO)) {
+
+			// Rebutja si no és el torn del jugador
+			if (partida.getActiu() == null || !partida.getActiu().equals(jugador)) {
+				return "Encara no es el torn del jugador";
+			}
+
+			// Comptar els poblats i les carreteres del jugador
+			long poblats = jugador.getConstruccionsJugador().stream().filter(c -> c instanceof Poblat).count();
+			long carreteres = jugador.getConstruccionsJugador().stream().filter(c -> c instanceof Carretera).count();
+
+			// Rebutja si no s'han construït el poblat i la carretera en el torn de preparació
+			if (partida.getRonda() == 1) {
+				if (poblats < 1 || carreteres < 1) {
+					return "Has de col·locar un poblat i una carretera abans de passar el torn";
 				}
-				
-				int seguentTorn = jugador.getOrdreTorn() + 1;
-				
-				//Quan hagin passat tots els torns, tornem al primer i anem incrementant.
-				if(seguentTorn > partida.getJugadors().size()) {
-					seguentTorn = 1;
-					partida.setRonda(partida.getRonda() + 1);
+
+			} else if (partida.getRonda() == 2) {
+				if (poblats < 2 || carreteres < 2) {
+					return "Has de col·locar un poblat i una carretera abans de passar el torn";
 				}
-				
-				//Assignar el nou jugador actiu amb un bucle.
+
+			}
+
+			// Gestionar el canvi de torn segons la ronda
+			int seguentTorn;
+
+			if (partida.getRonda() == 1) {
+				seguentTorn = jugador.getOrdreTorn() + 1;
+
+				// Quan acaba el primer ordre de torn, començar la segona ronda
+				if (seguentTorn > partida.getJugadors().size()) {
+					seguentTorn = partida.getJugadors().size();
+					partida.setRonda(2);
+				}
+
+			} else {
+				seguentTorn = jugador.getOrdreTorn() - 1;
+			}
+
+			// Comprovar si tots els jugadors han acabat les dues rondes
+			if (partida.getRonda() == 2 && seguentTorn < 1) {
+
+				// Buscar el primer jugador per començar la partida
+				for (Jugador j : partida.getJugadors()) {
+					if (j.getOrdreTorn() == 1) {
+						partida.setActiu(j);
+						break;
+					}
+				}
+
+				// Finalitzar la preparació
+				partida.setEstatPartida(EstatPartida.EN_CURS);
+				partida.setRonda(1);
+
+			} else {
+
+				// Assignar el següent jugador actiu
 				for (Jugador j : partida.getJugadors()) {
 					if (j.getOrdreTorn() == seguentTorn) {
 						partida.setActiu(j);
 						break;
 					}
 				}
-				
-				//Reiniciar el daus.
-				partida.setDausTirats(false);
-				
-				return "Torn passat correctament";
-			} else if (partida.getEstatPartida().equals(EstatPartida.PREPARACIO)){
-				
-				
-				// Comprovar que és el torn del jugador
-			    // Comprovar que ha col·locat poblat i carretera
-			    // Gestionar el torn en serp
-			    // Si tots han acabat les dues col·locacions:
-			    // Canviar estat a EN_CURS
-				
-				// Comprovacions de seguretat. Si encara es el torn del jugador
-				if (partida.getActiu() == null || !partida.getActiu().getId().equals(idJugador.intValue())) {  
-					return "Encara no es el torn del jugador"; 
-				}
-				
-				
-				
+
 			}
-		}	
+		}
+		return "Torn passat";
+
 	}
+
+	/*
+	 *
+	 * PASSAR TORN I CONSTRUIR
+	 *
 	
 	@Transactional
 	public String construir(Long idJugador, ConstruccioRequest request) {
