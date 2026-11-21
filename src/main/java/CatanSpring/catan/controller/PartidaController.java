@@ -2,10 +2,12 @@ package CatanSpring.catan.controller;
 
 import CatanSpring.catan.dto.JugadorRequest.PartidaRequest;
 import CatanSpring.catan.dto.PartidaResponse;
+import CatanSpring.catan.dto.TaulerHexagonResponse;
 import CatanSpring.catan.service.PartidaService;
 import CatanSpring.catan.model.*;
 import CatanSpring.model.enums.*;
 import CatanSpring.model.gestioFitxers.ImportarFitxer;
+import CatanSpring.catan.dto.TaulerHexagonResponse;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,4 +52,9 @@ public class PartidaController {
 		return partidaService.iniciarPartida(nomsJugadors, puntsPerGuanyar);
 	}
 	
+	@GetMapping("/{idPartida}/tauler")
+	public ResponseEntity<List<TaulerHexagonResponse>> mostrarTauler(
+	        @PathVariable Integer idPartida) {
+	    return partidaService.mostrarTauler(idPartida);
+	}
 }

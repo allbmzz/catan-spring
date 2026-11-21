@@ -16,6 +16,8 @@ import CatanSpring.model.enums.TipusCarta;
 import CatanSpring.model.enums.TipusRecurs;
 import CatanSpring.model.enums.TipusTerreny;
 import CatanSpring.model.gestioFitxers.ImportarFitxer;
+import CatanSpring.catan.dto.TaulerHexagonResponse;
+import CatanSpring.catan.repository.HexagonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,7 +62,6 @@ public class PartidaService {
 
 		//Barrejar noms, assignar colors i ordre
 		prepararJugadors(nomsJugadors,partida);
-
 		prepararCartes(partida);
 
 		// Guardar la partida y todas sus relaciones
@@ -186,6 +187,38 @@ public class PartidaService {
 		for (Aresta a:partida.getArestes()){
 			a.setPartida_id(partida);
 		}
+	}
+
+	@Autowired
+	private HexagonRepository hexagonRepository;
+	public ResponseEntity<List<TaulerHexagonResponse>> mostrarTauler(Integer idPartida) {
+		// Busca la partida a partir de l'ID
+		Partida partida = repo.findById(idPartida).orElse(null);
+		
+		// Si no la troba, doncs, et llancará l'error 404.
+		if (partida == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+		
+		// Obté els hexagons d'aquella partida a partir de la consulta del repositori
+		 List<Hexagon> hexagons = hexagonRepository.mostrarTauler(idPartida);
+		 
+		 // Guardem el ID del hexàgon on es troba el lladre (per defecte entenem que es DESERT)
+		 Integer idLladre = partida.getLladre().getId();
+		 
+		 //Prepara la llista dels DTO de TaulerHexagonResponse que es retornaran. (En forma de JSON como se ve en el swagger gente)
+		 List<TaulerHexagonResponse> resposta = new ArrayList<>();
+		 
+		 //Converteix cada hexàgon (adaptat a el demanat a TaulerHexagonResponse) i indica si conté el lladre.
+		 for (Hexagon h : hexagons) {
+		        boolean teLladre = h.getId().equals(idLladre);
+		        resposta.add(TaulerHexagonResponse.de(h, teLladre));
+		    }
+		 
+		 //Retorna el tauler de forma correcta (code 200)
+		 return ResponseEntity.ok(resposta);
+		
+		 
 	}
 
 
