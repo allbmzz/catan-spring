@@ -57,4 +57,9 @@ public class PartidaController {
 	        @PathVariable Integer idPartida) {
 	    return partidaService.mostrarTauler(idPartida);
 	}
+	
+	@PostMapping("/{idPartida}/daus")
+	public ResponseEntity<PartidaResponse> tirarDaus(@PathVariable Integer idPartida) {
+	    return partidaService.tirarDaus(idPartida);
+	}
 }

@@ -1,7 +1,9 @@
 package CatanSpring.catan.service;
 
 import CatanSpring.catan.model.Aresta;
+import CatanSpring.catan.model.Assentament;
 import CatanSpring.catan.model.CartaDesenvolupament;
+import CatanSpring.catan.model.Ciutat;
 import CatanSpring.catan.model.Hexagon;
 import CatanSpring.catan.model.HexagonVertex;
 import CatanSpring.catan.model.Jugador;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -219,7 +222,121 @@ public class PartidaService {
 		 
 	}
 
+	@Transactional
+	public ResponseEntity<PartidaResponse> tirarDaus(Integer idPartida) {
+	    
+		Partida partida = repo.findById(idPartida).orElse(null);
 
+		//Si la partida no existeix, retorna un error 404.
+	    if (partida == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    //Si la partida no es troba en curs, aquesta llança un error 400
+	    if (partida.getEstatPartida() != EstatPartida.EN_CURS) {
+	        return ResponseEntity.badRequest().build();
+	    }
+
+	    //Si ja s'han llançat els daus a la partida, llança també un error 404.
+	    if (partida.isDausTirats()) {
+	        return ResponseEntity.badRequest().build();
+	    }
+	    
+	    
+	    
+	    // Generem els valors dels 2 daus (de forma aleatória) i sumem el resultat
+	    Random aleatori = new Random();
+
+	    int dau1 = aleatori.nextInt(6) + 1;
+	    int dau2 = aleatori.nextInt(6) + 1;
+	    int tirada = dau1 + dau2;
+
+	    //Es guarda el resultat dels daus i s'indica que ja s'han llançat els daus.
+	    partida.setUltimaTirada(tirada);
+	    partida.setDausTirats(true);
+	    
+	    // Si sortis el nombre 7, no es podria generar recursos.
+	    if(tirada != 7) {
+	    	for(Hexagon h: partida.getHexagons()) {
+	    		
+	    		//Només s'agafen els hexàgons que tenen el mateix numero que el de tirada.
+	    		if(h.getNumero() != null && h.getNumero() == tirada) {
+	    			
+	    			//Es revisa els vèrtexs per a veure si hi trobem asentaments 
+	    			for(HexagonVertex hv : h.getVertexsHexagon() ) {
+	    				
+	    				Assentament assentament = hv.getVertex().getAssentament();
+	    				
+	    				
+	    				//Si no en troba, no es produeix absolutament res.
+	    				if(assentament == null) {
+	    					continue;
+	    				}
+	    				
+	    				//Amb aquesta variable, podem associar el tipus de recurs depenent el terreny.
+	    				TipusRecurs tipusRecurs = null;
+	    				
+	    				if(h.getTerreny() == TipusTerreny.BOSC) {
+	    					tipusRecurs = TipusRecurs.FUSTA;
+	    				} else if(h.getTerreny() == TipusTerreny.TURONS) {
+	    					tipusRecurs = TipusRecurs.MAO;
+	    				} else if (h.getTerreny() == TipusTerreny.PASTURES) {
+	    					tipusRecurs = TipusRecurs.LLANA;
+	    				} else if (h.getTerreny() == TipusTerreny.CAMPS) {
+	    					tipusRecurs = TipusRecurs.BLAT;
+	    				} else if (h.getTerreny() == TipusTerreny.MUNTANYES) {
+	    					tipusRecurs = TipusRecurs.MINERAL;
+	    				}
+	    				
+	    				//Si el terreny produeix algun recurs (corresponent), doncs s'inserta en el seu inventari. 
+	    				//(Amb aixó, es controla el cas de DESERT, que no genera cap recurs)
+	    				if(tipusRecurs != null) {
+	    					Jugador j = assentament.getJugador();
+	    					RecursJugador recurs = j.getInventari().get(tipusRecurs);
+	    					
+	    					// Un poblat rep una unitat. Les ciutats, dues
+	    					
+	    					int quantitat = 1;
+
+	    					if (assentament instanceof Ciutat) {
+	    					    quantitat = 2;
+	    					}
+
+	    					recurs.setQuantitat(recurs.getQuantitat() + quantitat);
+	    				}
+	    				
+	    			}
+	    			
+	    		}
+	    	}
+	    
+	    
+	    }
+	    
+	    // Retornem les dades actualitzades de la partida.
+	    return ResponseEntity.ok(PartidaResponse.de(partida));
+
+	}
+	
+	// LEED EL COMENTARIO --> Probablemente si lo probais en el swagger, os dará 400, (BAD REQUEST).
+	
+	// Forzad a que la partida esté en curso (EN_CURS) (Hacedlo en MYSQL Workbench o el DBeaver para verlo). 
+	// Además, comprovad que dausTirats es false, basicamente porque si ya habeis "tirado", este pasara a true y 
+	// os volverá a saltar BAD_REQUEST, no porque este mal si no porque no puedes tirar más de 2 veces.
+	
+	// ------------------------------------------------------------------------------------------------------------
+	
+	// UPDATE partida
+	// SET estat_partida = 'EN_CURS', daus_tirats = FALSE
+	// WHERE id = 1;
+	
+	//Si ejecutais después de esto, os debería de salir 200 (OK). Cuando modifiqueis la base de datos, acordaos de volver a ejecutar el CatanApplication 
+	
+	// TODAVIA NO ESTA ACABADO porque se tiene que implementar lo de las construcciones y lo de pasar turno. 
+	
+	
+	
+}
 
 	//public PartidaService(PartidaRepository repo) {
 	//	this.repo = repo;
@@ -235,6 +352,5 @@ public class PartidaService {
 	//public Optional</*nom_classe*/> buscar(Long id){
 	//	return repo.findById(id);
 		//}
+	
 
-
-}
