@@ -69,7 +69,9 @@ public class PartidaService {
 		//assignar taulell a la partida
 		crearTaulell(partida);
 
-		provocarErrorRollback();
+		//provocarErrorRollback();   CODI EXCLUSIU PER AL DOCUMENT PROVES, DESCOMENTA'L PER PROVAR
+		
+		
 		//Barrejar noms, assignar colors i ordre
 		prepararJugadors(nomsJugadors,partida);
 		prepararCartes(partida);
