@@ -19,7 +19,7 @@ public abstract class Construccio {
 	@JoinColumn(name = "id_jugador", nullable = false)
 	private Jugador jugador;
 
-	// Constructor Hibernate
+	// Constructors
 	public Construccio() {
 	}
 
@@ -27,7 +27,7 @@ public abstract class Construccio {
 		this.jugador = jugador;
 	}
 
-	// Getters i setters
+	// Getters i Setters
 	public Integer getId() {
 		return id;
 	}

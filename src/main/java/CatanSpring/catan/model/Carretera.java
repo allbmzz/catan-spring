@@ -10,7 +10,6 @@ import jakarta.persistence.*;
 )
 public class Carretera extends Construccio {
 
-
 	//Relacions
 	@OneToOne
 	@JoinColumn(name = "id_aresta", unique = true, nullable = false)
@@ -24,7 +23,7 @@ public class Carretera extends Construccio {
 		this.aresta = aresta;
 	}
 
-	//Get Set
+	//Getters i Setters
 	public Aresta getAresta() {
 		return aresta;
 	}
@@ -37,5 +36,4 @@ public class Carretera extends Construccio {
 	public String toString() {
 		return "Carretera [aresta=" + aresta + "]";
 	}
-
 }

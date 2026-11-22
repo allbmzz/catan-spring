@@ -40,7 +40,7 @@ public class HexagonVertex {
 		this.vertex = vertex;
 	}
 
-	//Get Set
+	//Getters i Setters
 	public Integer getId() {
 		return id;
 	}

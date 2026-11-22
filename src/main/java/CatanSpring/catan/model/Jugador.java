@@ -16,30 +16,6 @@ import java.util.*;
 				"JOIN j.inventari i " +
 				"WHERE j.id = :id"
 )
-/*
-@NamedQueries({
-		@NamedQuery(
-				name = "Jugador.infoJugador",
-				query = "SELECT j " +
-						"FROM Jugador j " +
-						"WHERE j.id = :id"
-		),
-		@NamedQuery(
-				name = "Jugador.numRecursosJugadors",
-				query = "SELECT j.id, SUM(r.quantitat) " +
-						"FROM Jugador j " +
-						"JOIN j.inventari r " +
-						"WHERE j.partida_id.id = :partida_id " +
-						"GROUP BY j.id"
-		),
-		@NamedQuery(
-				name = "Jugador.construccionsPerJugador",
-				query = "SELECT DISTINCT j " +
-						"FROM Jugador j " +
-						"LEFT JOIN FETCH j.construccionsJugador " +
-						"WHERE j.partida_id.id = :idPartida"
-		)})
-*/
 public class Jugador {
 
 	//Atributs
@@ -77,8 +53,7 @@ public class Jugador {
 	@OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL)
 	private List<CartaDesenvolupament> ma = new ArrayList<>();
 
-
-	// constructor Hibernate
+	// constructors
 	public Jugador() {
 	}
 
@@ -88,7 +63,7 @@ public class Jugador {
 		this.ordreTorn = ordreTorn;
 	}
 
-	// Getters i setters
+	// Getters i Setters
 	public Integer getId() {
 		return id;
 	}

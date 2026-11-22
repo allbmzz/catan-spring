@@ -17,8 +17,6 @@ import java.util.Objects;
 				query = "FROM Aresta a WHERE a.codi = :codi"
 		)
 })
-
-
 public class Aresta {
 
 	//Atributs
@@ -61,7 +59,7 @@ public class Aresta {
 		this.codi = codi;
 	}
 
-	//Get Set
+	//Getters i Setters
 	public Integer getId() {
 		return id;
 	}
@@ -127,8 +125,4 @@ public class Aresta {
 	public String toString() {
 		return "Aresta [id=" + id + ", codi=" + codi + "]";
 	}
-
-
-
-
 }

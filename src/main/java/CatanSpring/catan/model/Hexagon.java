@@ -25,7 +25,6 @@ import java.util.Set;
 						"LEFT JOIN FETCH a.jugador " +
 						"WHERE h.partida_id.id = :idPartida"
 		)})
-
 public class Hexagon {
 
 	//Atributs
@@ -78,7 +77,7 @@ public class Hexagon {
 
 	}
 
-	//Get Set
+	//Getters i Setters
 	public Integer getId() {
 		return id;
 	}

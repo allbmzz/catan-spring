@@ -44,9 +44,12 @@ public class PartidaService {
 	@Autowired 
 	private PartidaRepository repo;
 
+	/*
 	private void provocarErrorRollback() {
-	    throw new RuntimeException("Error simulat durant la inicialització");
+	    throw new RuntimeException("Error simulat durant la inicialització");  DESCOMENTA'L PER COMPROVAR QUE EL ROLLBACK A INICIARPARTIDA() FUNCIONA
 	}
+	*/
+	
 	@Transactional
 	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
 		
@@ -133,6 +136,14 @@ public class PartidaService {
 				rj.setJugador(j);
 				inventari.put(tr,rj);
 			}
+		}
+		
+		// Assignar el primer jugador com a jugador actiu
+		for (Jugador j : partida.getJugadors()) {
+		    if (j.getOrdreTorn() == 1) {
+		        partida.setActiu(j);
+		        break;
+		    }
 		}
 	}
 	
@@ -347,20 +358,3 @@ public class PartidaService {
 	
 	
 }
-
-	//public PartidaService(PartidaRepository repo) {
-	//	this.repo = repo;
-	// } --> Una alternativa
-
-
-
-	//public List</*Classe*/> lista(){
-	//	return repo.findAll();
-	//}
-
-
-	//public Optional</*nom_classe*/> buscar(Long id){
-	//	return repo.findById(id);
-		//}
-	
-

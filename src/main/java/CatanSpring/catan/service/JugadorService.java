@@ -183,6 +183,47 @@ public class JugadorService {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tipus de construcció invàlida");
 		}
 		
+		if (jugador.getPartida_id().getEstatPartida() != EstatPartida.PREPARACIO &&
+		        jugador.getPartida_id().getEstatPartida() != EstatPartida.EN_CURS) {
+		    return ResponseEntity.status(HttpStatus.CONFLICT)
+		            .body("No es poden fer construccions si la partida ha finalitzat");
+		}
+		
+		// Comprovacions específiques de la fase de preparació
+	    if (jugador.getPartida_id().getEstatPartida() == EstatPartida.PREPARACIO) {
+
+	        long poblats = 0;
+	        long carreteres = 0;
+
+	        for (Construccio c : jugador.getConstruccionsJugador()) {
+	            if (c instanceof Poblat) {
+	                poblats++;
+	            } else if (c instanceof Carretera) {
+	                carreteres++;
+	            }
+	        }
+
+	        String tipus = request.getTipus().toUpperCase();
+
+	        
+	        if (poblats >= 2 && carreteres >= 2) {
+	            return ResponseEntity.status(HttpStatus.CONFLICT)
+	                    .body("Ja has completat les construccions de preparació");
+	        }
+	        
+	        if (poblats == carreteres) {
+	            if (!tipus.equals("POBLAT")) {
+	                return ResponseEntity.status(HttpStatus.CONFLICT)
+	                        .body("Has de construir un poblat abans de la carretera");
+	            }
+	        } else  {
+	            if (!tipus.equals("CARRETERA")) {
+	                return ResponseEntity.status(HttpStatus.CONFLICT)
+	                        .body("Has de construir una carretera abans del següent poblat");
+	            }
+	        } 
+	    }
+		
 		// deleguem el proces a diferents funcions segons el tipus de construccio escollida
 		if (request.getTipus().toUpperCase().equals("CARRETERA")) {
 			Carretera c = construirCarretera(jugador, request.getIdAresta());
@@ -217,272 +258,410 @@ public class JugadorService {
 	}
 	
 	private Carretera construirCarretera(Jugador j, Long idAresta) {
-		
-		if (j==null) return null;
 
-		Aresta a = arestaRepo.findById(idAresta).orElse(null);
-		
-		if (a==null) return null;
+	    if (j == null) return null;
 
-		if(j.getPartida_id().getId()!=a.getPartida_id().getId()){
-			System.out.println("L'aresta i el jugador no pertanyen a la mateixa partida");
-			return null;
-		}
+	    Aresta a = arestaRepo.findById(idAresta).orElse(null);
 
-		if (a.getCarretera()!=null) {
-			System.out.println("Aquesta aresta ja té una carretera");
-			return null;
-		}
+	    if (a == null) return null;
 
-		// Comprovació del torn del jugador
-		if(!j.getPartida_id().getActiu().equals(j)){
-			System.out.println("No és el torn del jugador amb id: "+ j.getId());
-			return null;
-		}
+	    if (!j.getPartida_id().getId().equals(a.getPartida_id().getId())) {
+	        System.out.println("L'aresta i el jugador no pertanyen a la mateixa partida");
+	        return null;
+	    }
 
-		// Comprovació del límit de 15 carreteres per jugador
-		Long numCarreteres = carreteraRepo.numCarreteresJugador((long) j.getId());  // fem cast a Long per que getId() retorna int
+	    if (a.getCarretera() != null) {
+	        System.out.println("Aquesta aresta ja té una carretera");
+	        return null;
+	    }
 
-		if(numCarreteres>=15){
-			System.out.println("El jugador ja té el màxim de 15 carreteres");
-			return null;
-		}
+	    // Comprovació del torn del jugador
+	    if (j.getPartida_id().getActiu() == null ||
+	            !j.getPartida_id().getActiu().equals(j)) {
+	        System.out.println("No és el torn del jugador amb id: " + j.getId());
+	        return null;
+	    }
 
-		// Verificació dels assentaments dels vertex que formen l'aresta
-		Assentament ava=a.getVertexA().getAssentament();
-		Assentament avb=a.getVertexB().getAssentament();
+	    // Comprovació del límit de 15 carreteres per jugador
+	    Long numCarreteres = carreteraRepo.numCarreteresJugador((long) j.getId());
 
-		boolean connectatA = false;
-		boolean connectatB = false;
+	    if (numCarreteres >= 15) {
+	        System.out.println("El jugador ja té el màxim de 15 carreteres");
+	        return null;
+	    }
 
-		// Comprovació del vertex A
-		if(ava!=null){
-			if(ava.getJugador().getId()==j.getId()) connectatA=true;
-		}else{
-			for(Aresta ar : a.getVertexA().getArestesA()){
-				if(ar!=a && ar.getCarretera()!=null && ar.getCarretera().getJugador().getId()==j.getId()){
-					connectatA=true;
-					break;
-				}
-			}
+	    // Verificació dels assentaments dels vèrtexs que formen l'aresta
+	    Assentament ava = a.getVertexA().getAssentament();
+	    Assentament avb = a.getVertexB().getAssentament();
 
-			if(!connectatA){
-				for(Aresta ar : a.getVertexA().getArestesB()){
-					if(ar!=a && ar.getCarretera()!=null && ar.getCarretera().getJugador().getId()==j.getId()){
-						connectatA=true;
-						break;
-					}
-				}
-			}
-		}
+	    boolean connectatA = false;
+	    boolean connectatB = false;
 
-		// Comprovació del vertex B
-		if(avb!=null){
-			if(avb.getJugador().getId()==j.getId()) connectatB=true;
-		}else{
-			for(Aresta ar : a.getVertexB().getArestesA()){
-				if(ar!=a && ar.getCarretera()!=null && ar.getCarretera().getJugador().getId()==j.getId()){
-					connectatB=true;
-					break;
-				}
-			}
+	    // Comprovació del vèrtex A
+	    if (ava != null) {
+	        if (ava.getJugador().getId().equals(j.getId())) connectatA = true;
+	    } else {
+	        for (Aresta ar : a.getVertexA().getArestesA()) {
+	            if (ar != a && ar.getCarretera() != null &&
+	                    ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                connectatA = true;
+	                break;
+	            }
+	        }
 
-			if(!connectatB){
-				for(Aresta ar : a.getVertexB().getArestesB()){
-					if(ar!=a && ar.getCarretera()!=null && ar.getCarretera().getJugador().getId()==j.getId()){
-						connectatB=true;
-						break;
-					}
-				}
-			}
-		}
+	        if (!connectatA) {
+	            for (Aresta ar : a.getVertexA().getArestesB()) {
+	                if (ar != a && ar.getCarretera() != null &&
+	                        ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                    connectatA = true;
+	                    break;
+	                }
+	            }
+	        }
+	    }
 
-		// Comprovació de la connectivitat
-		if(j.getPartida_id().getEstatPartida()!=EstatPartida.PREPARACIO){
-			if(!connectatA && !connectatB){
-				System.out.println("L'aresta no està connectada a cap carretera o assentament propi");
-				return null;
-			}
-		}else{
-			// Pendent: comprovar que un dels extrems sigui el poblat acabat de col·locar
-		}
+	    // Comprovació del vèrtex B
+	    if (avb != null) {
+	        if (avb.getJugador().getId().equals(j.getId())) connectatB = true;
+	    } else {
+	        for (Aresta ar : a.getVertexB().getArestesA()) {
+	            if (ar != a && ar.getCarretera() != null &&
+	                    ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                connectatB = true;
+	                break;
+	            }
+	        }
 
-		// Comprovació dels recursos
-		if(j.getPartida_id().getEstatPartida()!=EstatPartida.PREPARACIO){
-			RecursJugador fusta = j.getInventari().get(TipusRecurs.FUSTA);
-			RecursJugador argila = j.getInventari().get(TipusRecurs.MAO);
+	        if (!connectatB) {
+	            for (Aresta ar : a.getVertexB().getArestesB()) {
+	                if (ar != a && ar.getCarretera() != null &&
+	                        ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                    connectatB = true;
+	                    break;
+	                }
+	            }
+	        }
+	    }
 
-			if(fusta==null || argila==null || fusta.getQuantitat()<1 || argila.getQuantitat()<1){
-				System.out.println("No tens recursos suficients per construir una carretera");
-				return null;
-			}
+	    // Comprovació de la connectivitat
+	    if (j.getPartida_id().getEstatPartida() != EstatPartida.PREPARACIO) {
 
-			fusta.setQuantitat(fusta.getQuantitat()-1);
-			argila.setQuantitat(argila.getQuantitat()-1);
-		}
+	        if (!connectatA && !connectatB) {
+	            System.out.println("L'aresta no està connectada a cap carretera o assentament propi");
+	            return null;
+	        }
 
-		// Creació de la carretera
-		Carretera c = new Carretera(a);
-		c.setJugador(j);
-		a.setCarretera(c);
-		
-		carreteraRepo.save(c);
+	    } else {
 
-		return c;
+	        // Comprovació del límit de dues carreteres durant la preparació
+	        long numCarreteresPreparacio = 0;
+
+	        for (Construccio construccio : j.getConstruccionsJugador()) {
+	            if (construccio instanceof Carretera) {
+	                numCarreteresPreparacio++;
+	            }
+	        }
+
+	        if (numCarreteresPreparacio >= 2) {
+	            System.out.println("Ja has construït les dues carreteres de preparació");
+	            return null;
+	        }
+
+	        Poblat poblatPendent = null;
+
+	        for (Construccio construccio : j.getConstruccionsJugador()) {
+
+	            if (construccio instanceof Poblat) {
+
+	                Poblat p = (Poblat) construccio;
+	                Vertex v = p.getVertex();
+
+	                boolean teCarretera = false;
+
+	                for (Aresta ar : v.getArestesA()) {
+	                    if (ar.getCarretera() != null &&
+	                            ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                        teCarretera = true;
+	                        break;
+	                    }
+	                }
+
+	                if (!teCarretera) {
+	                    for (Aresta ar : v.getArestesB()) {
+	                        if (ar.getCarretera() != null &&
+	                                ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                            teCarretera = true;
+	                            break;
+	                        }
+	                    }
+	                }
+
+	                if (!teCarretera) {
+	                    poblatPendent = p;
+	                    break;
+	                }
+	            }
+	        }
+
+	        if (poblatPendent == null) {
+	            System.out.println("No hi ha cap poblat pendent de carretera");
+	            return null;
+	        }
+
+	        Vertex vPoblat = poblatPendent.getVertex();
+
+	        if (!vPoblat.equals(a.getVertexA()) &&
+	                !vPoblat.equals(a.getVertexB())) {
+	            System.out.println("La carretera ha de connectar amb el poblat acabat de construir");
+	            return null;
+	        }
+	    }
+
+	    // Comprovació dels recursos
+	    if (j.getPartida_id().getEstatPartida() != EstatPartida.PREPARACIO) {
+
+	        RecursJugador fusta = j.getInventari().get(TipusRecurs.FUSTA);
+	        RecursJugador argila = j.getInventari().get(TipusRecurs.MAO);
+
+	        if (fusta == null || argila == null ||
+	                fusta.getQuantitat() < 1 || argila.getQuantitat() < 1) {
+	            System.out.println("No tens recursos suficients per construir una carretera");
+	            return null;
+	        }
+
+	        fusta.setQuantitat(fusta.getQuantitat() - 1);
+	        argila.setQuantitat(argila.getQuantitat() - 1);
+	    }
+
+	    // Creació de la carretera
+	    Carretera c = new Carretera(a);
+	    c.setJugador(j);
+	    a.setCarretera(c);
+
+	    carreteraRepo.save(c);
+
+	    return c;
 	}
-
+	
 	private Poblat construirPoblat(Jugador j, Long idVertex) {
 
-		if (j==null) return null;
-		
-		Vertex v = vertexRepo.findById(idVertex).orElse(null);
-		
-		if (v==null) return null;
+	    if (j == null) return null;
 
-		if(j.getPartida_id().getId()!=v.getPartida_id().getId()){
-			System.out.println("El vertex i el jugador no pertanyen a la mateixa partida");
-			return null;
-		}
+	    Vertex v = vertexRepo.findById(idVertex).orElse(null);
 
-		// Comprovació del torn del jugador
-		if(!j.getPartida_id().getActiu().equals(j)){
-			System.out.println("No és el torn del jugador amb id: "+j.getId());
-			return null;
-		}
+	    if (v == null) return null;
 
-		if(v.getAssentament()!=null){
-			System.out.println("Aquest vertex ja té un assentament");
-			return null;
-		}
+	    if (!j.getPartida_id().getId().equals(v.getPartida_id().getId())) {
+	        System.out.println("El vertex i el jugador no pertanyen a la mateixa partida");
+	        return null;
+	    }
 
-		// Comprovació de la regla de la distància
-		// Pendent de comprovar els assentaments dels vertex adjacents
+	    // Comprovació del torn del jugador
+	    if (j.getPartida_id().getActiu() == null ||
+	            !j.getPartida_id().getActiu().equals(j)) {
+	        System.out.println("No és el torn del jugador amb id: " + j.getId());
+	        return null;
+	    }
 
-		// Comprovació de la connexió amb una carretera pròpia
-		if(j.getPartida_id().getEstatPartida()!=EstatPartida.PREPARACIO){
-			boolean connectat = false;
+	    if (v.getAssentament() != null) {
+	        System.out.println("Aquest vertex ja té un assentament");
+	        return null;
+	    }
 
-			for(Aresta ar : v.getArestesA()){
-				if(ar.getCarretera()!=null && ar.getCarretera().getJugador().getId()==j.getId()){
-					connectat=true;
-					break;
-				}
-			}
+	    // Comprovació de la regla de la distància
+	    boolean vertexOcupat = false;
 
-			if(!connectat){
-				for(Aresta ar : v.getArestesB()){
-					if(ar.getCarretera()!=null && ar.getCarretera().getJugador().getId()==j.getId()){
-						connectat=true;
-						break;
-					}
-				}
-			}
+	    for (Aresta ar : v.getArestesA()) {
+	        Vertex vertexAdjacent = ar.getVertexA().equals(v)
+	                ? ar.getVertexB() : ar.getVertexA();
 
-			if(!connectat){
-				System.out.println("El vertex no està connectat a cap carretera pròpia");
-				return null;
-			}
-		}
+	        if (vertexAdjacent.getAssentament() != null) {
+	            vertexOcupat = true;
+	            break;
+	        }
+	    }
 
-		// Comprovació del límit de 5 poblats
-		Long numPoblats = poblatRepo.numPoblatsJugador(j.getId());
+	    if (!vertexOcupat) {
+	        for (Aresta ar : v.getArestesB()) {
+	            Vertex vertexAdjacent = ar.getVertexA().equals(v)
+	                    ? ar.getVertexB() : ar.getVertexA();
 
-		if(numPoblats>=5){
-			System.out.println("El jugador ja té el màxim de 5 poblats");
-			return null;
-		}
+	            if (vertexAdjacent.getAssentament() != null) {
+	                vertexOcupat = true;
+	                break;
+	            }
+	        }
+	    }
 
-		// Comprovació dels recursos
-		if(j.getPartida_id().getEstatPartida()!=EstatPartida.PREPARACIO){
-			RecursJugador fusta = j.getInventari().get(TipusRecurs.FUSTA);
-			RecursJugador argila = j.getInventari().get(TipusRecurs.MAO);
-			RecursJugador blat = j.getInventari().get(TipusRecurs.BLAT);
-			RecursJugador llana = j.getInventari().get(TipusRecurs.LLANA);
+	    if (vertexOcupat) {
+	        System.out.println("Hi ha un altre assentament en un vertex adjacent");
+	        return null;
+	    }
 
-			if(fusta==null || argila==null || blat==null || llana==null ||
-					fusta.getQuantitat()<1 || argila.getQuantitat()<1 ||
-					blat.getQuantitat()<1 || llana.getQuantitat()<1){
-				System.out.println("No tens recursos suficients per construir un poblat");
-				return null;
-			}
+	    // Comprovació de la connexió amb una carretera pròpia
+	    if (j.getPartida_id().getEstatPartida() != EstatPartida.PREPARACIO) {
 
-			fusta.setQuantitat(fusta.getQuantitat()-1);
-			argila.setQuantitat(argila.getQuantitat()-1);
-			blat.setQuantitat(blat.getQuantitat()-1);
-			llana.setQuantitat(llana.getQuantitat()-1);
-		}
+	        boolean connectat = false;
 
-		// Creació del poblat
-		Poblat p = new Poblat(v);
-		p.setJugador(j);
-		v.setAssentament(p);
+	        for (Aresta ar : v.getArestesA()) {
+	            if (ar.getCarretera() != null &&
+	                    ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                connectat = true;
+	                break;
+	            }
+	        }
 
-		// Repartiment dels recursos inicials del segon poblat
-		// Pendent d'implementar segons les relacions entre vertex i terrenys
+	        if (!connectat) {
+	            for (Aresta ar : v.getArestesB()) {
+	                if (ar.getCarretera() != null &&
+	                        ar.getCarretera().getJugador().getId().equals(j.getId())) {
+	                    connectat = true;
+	                    break;
+	                }
+	            }
+	        }
 
-		poblatRepo.save(p);
-		return p;
+	        if (!connectat) {
+	            System.out.println("El vertex no està connectat a cap carretera pròpia");
+	            return null;
+	        }
+	    }
+
+	    // Comprovació del límit de poblats
+	    Long numPoblats = poblatRepo.numPoblatsJugador(j.getId());
+
+	    if (j.getPartida_id().getEstatPartida() == EstatPartida.PREPARACIO) {
+	        if (numPoblats >= 2) {
+	            System.out.println("El jugador ja té els dos poblats de preparació");
+	            return null;
+	        }
+	    } else {
+	        if (numPoblats >= 5) {
+	            System.out.println("El jugador ja té el màxim de 5 poblats");
+	            return null;
+	        }
+	    }
+
+	    // Comprovació dels recursos
+	    if (j.getPartida_id().getEstatPartida() != EstatPartida.PREPARACIO) {
+
+	        RecursJugador fusta = j.getInventari().get(TipusRecurs.FUSTA);
+	        RecursJugador argila = j.getInventari().get(TipusRecurs.MAO);
+	        RecursJugador blat = j.getInventari().get(TipusRecurs.BLAT);
+	        RecursJugador llana = j.getInventari().get(TipusRecurs.LLANA);
+
+	        if (fusta == null || argila == null || blat == null || llana == null ||
+	                fusta.getQuantitat() < 1 || argila.getQuantitat() < 1 ||
+	                blat.getQuantitat() < 1 || llana.getQuantitat() < 1) {
+
+	            System.out.println("No tens recursos suficients per construir un poblat");
+	            return null;
+	        }
+
+	        fusta.setQuantitat(fusta.getQuantitat() - 1);
+	        argila.setQuantitat(argila.getQuantitat() - 1);
+	        blat.setQuantitat(blat.getQuantitat() - 1);
+	        llana.setQuantitat(llana.getQuantitat() - 1);
+	    }
+
+	    // Creació del poblat
+	    Poblat p = new Poblat(v);
+	    p.setJugador(j);
+	    v.setAssentament(p);
+
+	    // Repartiment dels recursos inicials del segon poblat
+	    if (j.getPartida_id().getEstatPartida() == EstatPartida.PREPARACIO
+	            && numPoblats == 1) {
+
+	        for (HexagonVertex hv : v.getHexagonVertex()) {
+
+	            Hexagon h = hv.getHexagon();
+	            TipusRecurs tipusRecurs = null;
+
+	            switch (h.getTerreny()) {
+	                case BOSC:
+	                    tipusRecurs = TipusRecurs.FUSTA;
+	                    break;
+
+	                case TURONS:
+	                    tipusRecurs = TipusRecurs.MAO;
+	                    break;
+
+	                case PASTURES:
+	                    tipusRecurs = TipusRecurs.LLANA;
+	                    break;
+
+	                case CAMPS:
+	                    tipusRecurs = TipusRecurs.BLAT;
+	                    break;
+
+	                case MUNTANYES:
+	                    tipusRecurs = TipusRecurs.MINERAL;
+	                    break;
+
+	                default:
+	                    // El desert no proporciona cap recurs
+	                    break;
+	            }
+
+	            if (tipusRecurs != null) {
+	                RecursJugador recursJugador = j.getInventari().get(tipusRecurs);
+
+	                if (recursJugador != null) {
+	                    recursJugador.setQuantitat(recursJugador.getQuantitat() + 1);
+	                }
+	            }
+	        }
+	    }
+
+	    poblatRepo.save(p);
+	    return p;
 	}
 
-
 	private Ciutat millorarACiutat(Jugador j, Long idVertex) {
+	    if (j == null || idVertex == null) return null;
 
-		if (j==null) return null;
+	    Vertex v = vertexRepo.findById(idVertex).orElse(null);
+	    if (v == null) return null;
 
-		Vertex v = vertexRepo.findById(idVertex).orElse(null);
-		if (v==null) return null;
+	    if (!j.getPartida_id().getId().equals(v.getPartida_id().getId())) return null;
 
-		if(j.getPartida_id().getId()!=v.getPartida_id().getId()){
-			System.out.println("El vertex i el jugador no pertanyen a la mateixa partida");
-			return null;
-		}
+	    if (j.getPartida_id().getActiu() == null ||
+	            !j.getPartida_id().getActiu().equals(j)) return null;
 
-		// Comprovació del torn del jugador
-		if(!j.getPartida_id().getActiu().equals(j)){
-			System.out.println("No és el torn del jugador amb id: "+j.getId());
-			return null;
-		}
-		
-		if(v.getAssentament()==null || !(v.getAssentament() instanceof Poblat)){
-			System.out.println("Aquest vertex no té cap poblat per millorar");
-			return null;
-		}
+	    if (v.getAssentament() == null ||
+	            !(v.getAssentament() instanceof Poblat)) return null;
 
-		Poblat p = (Poblat) v.getAssentament();
+	    Poblat p = (Poblat) v.getAssentament();
 
-		if(p.getJugador().getId()!=j.getId()){
-			System.out.println("Aquest poblat no és teu");
-			return null;
-		}
+	    if (!p.getJugador().getId().equals(j.getId())) return null;
 
-		// Comprovació del límit de 4 ciutats
-		Long numCiutats = ciutatRepo.numCiutatsJugador(j.getId());
+	    Long numCiutats = ciutatRepo.numCiutatsJugador(j.getId());
+	    if (numCiutats >= 4) return null;
 
-		if(numCiutats>=4){
-			System.out.println("El jugador ja té el màxim de 4 ciutats");
-			return null;
-		}
+	    RecursJugador blat = j.getInventari().get(TipusRecurs.BLAT);
+	    RecursJugador mineral = j.getInventari().get(TipusRecurs.MINERAL);
 
-		// Comprovació dels recursos
-		RecursJugador blat = j.getInventari().get(TipusRecurs.BLAT);
-		RecursJugador mineral = j.getInventari().get(TipusRecurs.MINERAL);
+	    if (blat == null || mineral == null ||
+	            blat.getQuantitat() < 2 || mineral.getQuantitat() < 3) {
+	        return null;
+	    }
 
-		if(blat==null || mineral==null || blat.getQuantitat()<2 || mineral.getQuantitat()<3){
-			System.out.println("No tens recursos suficients per millorar a ciutat");
-			return null;
-		}
+	    // Descomptar recursos
+	    blat.setQuantitat(blat.getQuantitat() - 2);
+	    mineral.setQuantitat(mineral.getQuantitat() - 3);
 
-		blat.setQuantitat(blat.getQuantitat()-2);
-		mineral.setQuantitat(mineral.getQuantitat()-3);
+	    // Eliminar el poblat anterior
+	    v.setAssentament(null);
+	    poblatRepo.delete(p);
 
-		// Creació de la ciutat
-		Ciutat c = new Ciutat(v);
-		c.setJugador(j);
+	    // Crear la ciutat al mateix vèrtex
+	    Ciutat c = new Ciutat(v);
+	    c.setJugador(j);
+	    v.setAssentament(c);
 
-		v.setAssentament(c);
-		
-		ciutatRepo.save(c);
+	    ciutatRepo.save(c);
 
-		return c;
+	    return c;
 	}
 }

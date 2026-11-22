@@ -1,6 +1,5 @@
 package CatanSpring.catan.model;
 
-import CatanSpring.catan.model.*;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -15,7 +14,7 @@ import java.util.Set;
 		}
 )
 public class Vertex {
-
+	// Atributs
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, unique = true)
@@ -40,6 +39,7 @@ public class Vertex {
 	@OneToOne(mappedBy = "vertex")
 	private Assentament assentament;
 
+	// Constructors
 	public Vertex() {
 	}
 
@@ -47,6 +47,7 @@ public class Vertex {
 		this.codi = codi;
 	}
 
+	// Getters i Setters
 	public void setId(Integer id) {
 		this.id = id;
 	}

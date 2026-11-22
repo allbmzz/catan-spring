@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CarregaInicial implements CommandLineRunner {
-    //Aqui va la funcó que crida als csvs
     @Autowired
     private PartidaService service;
 
@@ -21,10 +20,6 @@ public class CarregaInicial implements CommandLineRunner {
 		if (pRepository.count() > 0) {
 			System.out.println("La BD ja té dades: no es carreguen els CSV");
 			return;
-		}
-		//Comprovar com cal afegir els elements del CSV, el taulell s'hauria de carregar amb la partida ja creada o durant la creació, no abans.
-		//int n = service.carregarDades();
-		//System.out.println("Taulell carregat dels CSV: " + n);
-		
+		}		
 	}
 }

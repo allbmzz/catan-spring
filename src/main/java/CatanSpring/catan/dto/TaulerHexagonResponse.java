@@ -32,7 +32,5 @@ public record TaulerHexagonResponse (Integer id, TipusTerreny terreny, Integer n
 	                h.getNumero(),
 	                teLladre,
 	                construccions);
-		
-	}
-	
+	}	
 }

@@ -1,9 +1,7 @@
 package CatanSpring.catan.model;
 
-import CatanSpring.catan.model.Partida;
 import CatanSpring.model.enums.TipusCarta;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
 
@@ -35,8 +33,7 @@ public class CartaDesenvolupament {
 	@JoinColumn(name = "jugador_id")
 	private Jugador jugador;
 
-
-	// constructor buit hibernate
+	// constructors
 	public CartaDesenvolupament() {
 	}
 
@@ -46,7 +43,7 @@ public class CartaDesenvolupament {
 		this.rondaCompra = rondaCompra;
 	}
 
-	//Get Set
+	//Getters i Setters
 	public Integer getId() {
 		return id;
 	}

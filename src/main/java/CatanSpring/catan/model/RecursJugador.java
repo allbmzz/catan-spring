@@ -10,7 +10,7 @@ import java.util.Objects;
 @Table(name="recursJugador", uniqueConstraints = @UniqueConstraint(columnNames = {"id_jugador","tipus_jugador"}))
 
 public class RecursJugador {
-	
+	// Atributs
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="id_recurs_jugador",nullable=false, unique=true)
@@ -29,6 +29,7 @@ public class RecursJugador {
 	@JoinColumn(name = "id_jugador")
 	private Jugador jugador;
 	
+	// Constructors
 	public RecursJugador() {
 		
 	}
@@ -38,6 +39,7 @@ public class RecursJugador {
 		this.quantitat = quantitat;
 	}
 
+	// Getters i Setters
 	public Integer getId() {
 		return id;
 	}
@@ -90,11 +92,5 @@ public class RecursJugador {
 	@Override
 	public String toString() {
 		return "RecursJugador [id=" + id + ", tipus=" + tipus + ", quantitat=" + quantitat + "]";
-	}
-	
-	
-	
-	
-	
-	
+	}	
 }

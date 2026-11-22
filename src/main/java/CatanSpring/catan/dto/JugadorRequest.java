@@ -7,9 +7,6 @@ import java.util.List;
 public record JugadorRequest() { // 
 	
 	// Rep amb RequestBody un JSON amb la llista de noms dels jugadors i, opcionalment, els punts per guanyar. 
-	
 	public record PartidaRequest(List<String> jugadors, Integer puntsPerGuanyar) {
-		
 	}
-
 }

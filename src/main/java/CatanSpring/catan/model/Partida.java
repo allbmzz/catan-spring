@@ -2,7 +2,6 @@ package CatanSpring.catan.model;
 
 import CatanSpring.model.enums.EstatPartida;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -93,7 +92,7 @@ public class Partida {
 		this.jugadors=new HashSet<>();
 	}
 
-	//Get Set
+	//Getters i Setters
 	public Integer getId() {
 		return id;
 	}
@@ -240,5 +239,4 @@ public class Partida {
 				+ ", ultimaTirada=" + ultimaTirada + ", puntsPerGuanyar=" + puntsPerGuanyar + ", dausTirats="
 				+ dausTirats + ", lladrePendent=" + lladrePendent + "]";
 	}
-
 }
