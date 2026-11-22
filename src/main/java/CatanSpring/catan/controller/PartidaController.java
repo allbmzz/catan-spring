@@ -48,13 +48,11 @@ public class PartidaController {
 	
 	@PostMapping
 	public ResponseEntity<PartidaResponse> iniciarPartida(@RequestParam Set<String> nomsJugadors, @RequestParam int puntsPerGuanyar) {
-		
 		return partidaService.iniciarPartida(nomsJugadors, puntsPerGuanyar);
 	}
 	
 	@GetMapping("/{idPartida}/tauler")
-	public ResponseEntity<List<TaulerHexagonResponse>> mostrarTauler(
-	        @PathVariable Integer idPartida) {
+	public ResponseEntity<List<TaulerHexagonResponse>> mostrarTauler(@PathVariable Integer idPartida) {
 	    return partidaService.mostrarTauler(idPartida);
 	}
 	

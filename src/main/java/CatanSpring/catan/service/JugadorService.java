@@ -3,13 +3,15 @@ package CatanSpring.catan.service;
 
 import java.util.Optional;
 
-import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import CatanSpring.catan.dto.ConstruccioRequest;
 import CatanSpring.catan.dto.JugadorResponse;
-import CatanSpring.catan.repository.JugadorRepository;
+import CatanSpring.catan.repository.*;
 import CatanSpring.model.enums.*;
 import CatanSpring.catan.model.*;
 
@@ -22,7 +24,23 @@ public class JugadorService {
 	public JugadorService(JugadorRepository repo) {
 		this.repo = repo;
 	}
+	
+	// com que nomes podem especificar un constructor, la resta de repositoris que fem servir seran amb @Autowired
+	@Autowired
+	private ArestaRepository arestaRepo;
+	
+	@Autowired
+	private CarreteraRepository carreteraRepo;
+	
+	@Autowired
+	private VertexRepository vertexRepo;
 
+	@Autowired
+	private PoblatRepository poblatRepo;
+	
+	@Autowired
+	private CiutatRepository ciutatRepo;
+	
 	@Transactional(readOnly = true)
 	public Optional<JugadorResponse> mostrarRecursos(Long idJugador) {
 		// Busquem el jugador i el transformem a DTO si existeix
@@ -30,39 +48,35 @@ public class JugadorService {
 		return repo.findById(idJugador).map(JugadorResponse::de);
 	}
 	
-	
-	
-	
-
 	@Transactional
-	public String passarTorn(Long idJugador) {
+	public ResponseEntity<String> passarTorn(Long idJugador) {
 		
 		Jugador jugador = repo.findById(idJugador).orElse(null);
 		
 		if (jugador == null) { 
-			return "No s'ha trobat el jugador de id " + idJugador;
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No s'ha trobat el jugador de id " + idJugador);
 		}
 		Partida partida = jugador.getPartida_id();
 
 
 		// Rebutjar no es troba la partida o la partida no conté al jugador (doble verificació)
 		if (partida == null || !partida.getJugadors().contains(jugador)) {
-			return "No s'ha trobat la partida d'aquest jugador";
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No s'ha trobat la partida d'aquest jugador");
 
 			//Rebutjar una partida ja finalitzada
 		} else if (partida.getEstatPartida().equals(EstatPartida.FINALITZADA)) {
-			return "La partida d'aquest jugador ja ha finalitzat";
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("La partida d'aquest jugador ja ha finalitzat");
 
 		} else if (partida.getEstatPartida().equals(EstatPartida.EN_CURS)){
 
 			// Comprovacions de seguretat. Si encara és el torn del jugador
 			if (partida.getActiu() == null || !partida.getActiu().equals(jugador)) {
-				return "Encara no es el torn del jugador";
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("Encara no es el torn del jugador");
 			}
 
 			// Comprovacions de seguretat. Si no s'han tirat els daus prèviament
 			if (!partida.isDausTirats()) {
-				return "Encara no s'han tirat els daus";
+				return ResponseEntity.status(HttpStatus.CONFLICT).body( "Encara no s'han tirat els daus");
 			}
 
 			// Calcular el següent torn
@@ -89,7 +103,7 @@ public class JugadorService {
 
 			// Rebutja si no és el torn del jugador
 			if (partida.getActiu() == null || !partida.getActiu().equals(jugador)) {
-				return "Encara no es el torn del jugador";
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("Encara no es el torn del jugador");
 			}
 
 			// Comptar els poblats i les carreteres del jugador
@@ -99,12 +113,12 @@ public class JugadorService {
 			// Rebutja si no s'han construït el poblat i la carretera en el torn de preparació
 			if (partida.getRonda() == 1) {
 				if (poblats < 1 || carreteres < 1) {
-					return "Has de col·locar un poblat i una carretera abans de passar el torn";
+					return ResponseEntity.status(HttpStatus.CONFLICT).body("Has de col·locar un poblat i una carretera abans de passar el torn");
 				}
 
 			} else if (partida.getRonda() == 2) {
 				if (poblats < 2 || carreteres < 2) {
-					return "Has de col·locar un poblat i una carretera abans de passar el torn";
+					return ResponseEntity.status(HttpStatus.CONFLICT).body("Has de col·locar un poblat i una carretera abans de passar el torn");
 				}
 
 			}
@@ -152,47 +166,62 @@ public class JugadorService {
 
 			}
 		}
-		return "Torn passat";
+		return ResponseEntity.status(HttpStatus.OK).body("Torn passat");
 
 	}
 
-	/*
-	 *
-	 * PASSAR TORN I CONSTRUIR
-	 *
-	
 	@Transactional
-	public String construir(Long idJugador, ConstruccioRequest request) {
+	public ResponseEntity<String> construir(Long idJugador, ConstruccioRequest request) {
 		
 		Jugador jugador = repo.findById(idJugador).orElse(null);
 		
-
 		if (jugador == null) { 
-			return "No s'ha trobat el jugador";
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Jugador no trobat");
 		}
 		
+		if (request == null || request.getTipus() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tipus de construcció invàlida");
+		}
+		
+		// deleguem el proces a diferents funcions segons el tipus de construccio escollida
 		if (request.getTipus().toUpperCase().equals("CARRETERA")) {
 			Carretera c = construirCarretera(jugador, request.getIdAresta());
 			
+			if (c == null) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error durant la creació de la carretera");
+			}
+			
+			return ResponseEntity.status(HttpStatus.CREATED).header("Catan-info", "Carretera construida correctament").body("CARRETERA CONSTRUIDA " + c);
+			
 		} else if (request.getTipus().toUpperCase().equals("POBLAT")) {
+			Poblat p = construirPoblat(jugador, request.getIdVertex());
+			
+			if (p == null) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error durant la creació del poblat");
+			}
+			
+			return ResponseEntity.status(HttpStatus.CREATED).header("Catan-info", "Poblat construit correctament").body("POBLAT CONSTRUIT " + p);
+			
+		} else if (request.getTipus().toUpperCase().equals("CIUTAT")){
+			Ciutat c = millorarACiutat(jugador, request.getIdVertex());
+			
+			if (c == null) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error durant la creació de la ciutat");
+			}
+			
+			return ResponseEntity.status(HttpStatus.CREATED).header("Catan-info", "Ciutat construïda correctament").body("CIUTAT CONSTRUIDA " + c);
 			
 		} else {
-			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tipus de construcció invàlida");
 		}
-		
 	}
 	
-	
-	
-	private Carretera ConstruirCarretera(int idJugador, int idAresta) {
-		
-		Jugador j = repo.findById(idJugador).orElse(null);
+	private Carretera construirCarretera(Jugador j, Long idAresta) {
 		
 		if (j==null) return null;
 
-		Aresta a = session.createNamedQuery("Aresta.infoAresta", Aresta.class)
-				.setParameter("id", idAresta)
-				.uniqueResult();
+		Aresta a = arestaRepo.findById(idAresta).orElse(null);
+		
 		if (a==null) return null;
 
 		if(j.getPartida_id().getId()!=a.getPartida_id().getId()){
@@ -207,14 +236,12 @@ public class JugadorService {
 
 		// Comprovació del torn del jugador
 		if(!j.getPartida_id().getActiu().equals(j)){
-			System.out.println("No és el torn del jugador amb id: "+idJugador);
+			System.out.println("No és el torn del jugador amb id: "+ j.getId());
 			return null;
 		}
 
 		// Comprovació del límit de 15 carreteres per jugador
-		Long numCarreteres = session.createNamedQuery("Carretera.numCarreteresJugador", Long.class)
-				.setParameter("id", idJugador)
-				.uniqueResult();
+		Long numCarreteres = carreteraRepo.numCarreteresJugador((long) j.getId());  // fem cast a Long per que getId() retorna int
 
 		if(numCarreteres>=15){
 			System.out.println("El jugador ja té el màxim de 15 carreteres");
@@ -298,22 +325,18 @@ public class JugadorService {
 		Carretera c = new Carretera(a);
 		c.setJugador(j);
 		a.setCarretera(c);
-
-		session.persist(c);
+		
+		carreteraRepo.save(c);
 
 		return c;
 	}
-	
 
-	private Poblat ConstruirPoblat(Session session, int idJugador, int idVertex) {
-		Jugador j = session.createNamedQuery("Jugador.infoJugador", Jugador.class)
-				.setParameter("id", idJugador)
-				.uniqueResult();
+	private Poblat construirPoblat(Jugador j, Long idVertex) {
+
 		if (j==null) return null;
-
-		Vertex v = session.createNamedQuery("Vertex.infoVertex", Vertex.class)
-				.setParameter("id", idVertex)
-				.uniqueResult();
+		
+		Vertex v = vertexRepo.findById(idVertex).orElse(null);
+		
 		if (v==null) return null;
 
 		if(j.getPartida_id().getId()!=v.getPartida_id().getId()){
@@ -323,7 +346,7 @@ public class JugadorService {
 
 		// Comprovació del torn del jugador
 		if(!j.getPartida_id().getActiu().equals(j)){
-			System.out.println("No és el torn del jugador amb id: "+idJugador);
+			System.out.println("No és el torn del jugador amb id: "+j.getId());
 			return null;
 		}
 
@@ -362,9 +385,7 @@ public class JugadorService {
 		}
 
 		// Comprovació del límit de 5 poblats
-		Long numPoblats = session.createNamedQuery("Poblat.numPoblatsJugador", Long.class)
-				.setParameter("id", idJugador)
-				.uniqueResult();
+		Long numPoblats = poblatRepo.numPoblatsJugador(j.getId());
 
 		if(numPoblats>=5){
 			System.out.println("El jugador ja té el màxim de 5 poblats");
@@ -396,24 +417,19 @@ public class JugadorService {
 		p.setJugador(j);
 		v.setAssentament(p);
 
-		session.persist(p);
-
 		// Repartiment dels recursos inicials del segon poblat
 		// Pendent d'implementar segons les relacions entre vertex i terrenys
 
+		poblatRepo.save(p);
 		return p;
 	}
 
 
-	private Ciutat MillorarACiutat(Session session, int idJugador, int idVertex) {
-		Jugador j = session.createNamedQuery("Jugador.infoJugador", Jugador.class)
-				.setParameter("id", idJugador)
-				.uniqueResult();
+	private Ciutat millorarACiutat(Jugador j, Long idVertex) {
+
 		if (j==null) return null;
 
-		Vertex v = session.createNamedQuery("Vertex.infoVertex", Vertex.class)
-				.setParameter("id", idVertex)
-				.uniqueResult();
+		Vertex v = vertexRepo.findById(idVertex).orElse(null);
 		if (v==null) return null;
 
 		if(j.getPartida_id().getId()!=v.getPartida_id().getId()){
@@ -423,7 +439,7 @@ public class JugadorService {
 
 		// Comprovació del torn del jugador
 		if(!j.getPartida_id().getActiu().equals(j)){
-			System.out.println("No és el torn del jugador amb id: "+idJugador);
+			System.out.println("No és el torn del jugador amb id: "+j.getId());
 			return null;
 		}
 		
@@ -440,9 +456,7 @@ public class JugadorService {
 		}
 
 		// Comprovació del límit de 4 ciutats
-		Long numCiutats = session.createNamedQuery("Ciutat.numCiutatsJugador", Long.class)
-				.setParameter("id", idJugador)
-				.uniqueResult();
+		Long numCiutats = ciutatRepo.numCiutatsJugador(j.getId());
 
 		if(numCiutats>=4){
 			System.out.println("El jugador ja té el màxim de 4 ciutats");
@@ -466,12 +480,9 @@ public class JugadorService {
 		c.setJugador(j);
 
 		v.setAssentament(c);
-
-		session.remove(p);
-		session.persist(c);
+		
+		ciutatRepo.save(c);
 
 		return c;
 	}
-	
-	*/
 }

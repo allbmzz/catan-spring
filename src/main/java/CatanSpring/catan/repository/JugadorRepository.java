@@ -7,9 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import CatanSpring.catan.model.*;
 
-//Cambiar el Jugador repository por classe en CatanSpring.models
-
-//NO PONER ETIQUETA, YA HEREDA DE JPAREPOSITORY
 // JpaRepository ja proporciona findById(), save(), delete(), etc.
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
 

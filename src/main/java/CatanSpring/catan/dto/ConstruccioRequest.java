@@ -3,8 +3,8 @@ package CatanSpring.catan.dto;
 public class ConstruccioRequest { // request per obtenir el tipus de construccio que vol construir el jugador.
 	
 	private String tipus;  // tipus de construccio a escollir
-	private int idAresta; // posicio aresta per construir una carretera
-	private int idVertex;  // posicio vertex per construir poble o ciutat
+	private Long idAresta; // posicio aresta per construir una carretera
+	private Long idVertex;  // posicio vertex per construir poble o ciutat
 	
 	public String getTipus() {
 		return this.tipus;
@@ -14,19 +14,19 @@ public class ConstruccioRequest { // request per obtenir el tipus de construccio
 		this.tipus = tipus;
 	}
 	
-	public int getIdAresta() {
+	public Long getIdAresta() {
 		return this.idAresta;
 	}
 	
-	public void setIdAresta(int idAresta) {
+	public void setIdAresta(Long idAresta) {
 		this.idAresta = idAresta;
 	}
 	
-	public int getIdVertex() {
+	public Long getIdVertex() {
 		return this.idVertex;
 	}
 	
-	public void setIdVertex(int idVertex) {
+	public void setIdVertex(Long idVertex) {
 		this.idVertex = idVertex;
 	}
 }

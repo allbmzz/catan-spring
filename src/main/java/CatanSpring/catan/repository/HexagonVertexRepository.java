@@ -4,12 +4,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import CatanSpring.catan.model.HexagonVertex;
 
-//Cambiar el Jugador repository por classe en CatanSpring.models
-
-//NO PONER ETIQUETA, YA HEREDA DE JPAREPOSITORY
-public interface HexagonVertexRepository extends JpaRepository<HexagonVertex, Long> {
-	
-	
-	
-
-}
+public interface HexagonVertexRepository extends JpaRepository<HexagonVertex, Long> {}

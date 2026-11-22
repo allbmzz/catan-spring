@@ -44,32 +44,40 @@ public class PartidaService {
 	@Autowired 
 	private PartidaRepository repo;
 
+	private void provocarErrorRollback() {
+	    throw new RuntimeException("Error simulat durant la inicialització");
+	}
 	@Transactional
 	public ResponseEntity<PartidaResponse> iniciarPartida(Set<String> nomsJugadors, int puntsPerGuanyar) {
-//		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 || puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
-//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//		}
+		
+		if(nomsJugadors.size() < 2 || nomsJugadors.size()>4 ) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Info-Catan", "De 2 a 4 jugadors maxim").build();
+		}
+			
+		if(puntsPerGuanyar <= 0 || puntsPerGuanyar > 100) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Info-Catan", "De 1 a 100 punts maxim").build();
+		}
+		
 		EstatPartida estat=EstatPartida.PREPARACIO;
 		LocalDate dataInici= LocalDate.now();
-		int ronda=0;
+		int ronda=1;
 		int ultimaTirada=0;
-		//System.out.print("Introdueix la quantitat de punts per guanyar: ");
-		//int puntsPerGuanyar=getInt(1,100);
+
 		boolean dausTirats=false;
 		boolean lladrePendent=false;
 		Partida partida = new Partida(estat,dataInici,ronda,ultimaTirada,puntsPerGuanyar,dausTirats,lladrePendent);
 		//assignar taulell a la partida
 		crearTaulell(partida);
 
+		provocarErrorRollback();
 		//Barrejar noms, assignar colors i ordre
 		prepararJugadors(nomsJugadors,partida);
 		prepararCartes(partida);
 
 		// Guardar la partida y todas sus relaciones
-		// Guardar la partida y todas sus relaciones
 		Partida partidaGuardada = repo.saveAndFlush(partida);
 
-		return ResponseEntity.status(HttpStatus.CREATED).header("Partida-info", "Creació partida ID: " + partidaGuardada.getId()).body(PartidaResponse.de(partidaGuardada));
+		return ResponseEntity.status(HttpStatus.CREATED).header("Info-Catan", "Creació partida ID: " + partidaGuardada.getId()).body(PartidaResponse.de(partidaGuardada));
 	}
 
 	public void prepararCartes(Partida partida) {
@@ -229,17 +237,17 @@ public class PartidaService {
 
 		//Si la partida no existeix, retorna un error 404.
 	    if (partida == null) {
-	        return ResponseEntity.notFound().build();
+	        return ResponseEntity.notFound().header("Info-catan", "La partida no existeix").build();
 	    }
 
 	    //Si la partida no es troba en curs, aquesta llança un error 400
 	    if (partida.getEstatPartida() != EstatPartida.EN_CURS) {
-	        return ResponseEntity.badRequest().build();
+	        return ResponseEntity.badRequest().header("Info-Catan", "La partida no es troba en curs").build();
 	    }
 
 	    //Si ja s'han llançat els daus a la partida, llança també un error 404.
 	    if (partida.isDausTirats()) {
-	        return ResponseEntity.badRequest().build();
+	        return ResponseEntity.badRequest().header("Info-Catan", "Ja s'han llançat els daus").build();
 	    }
 	    
 	    

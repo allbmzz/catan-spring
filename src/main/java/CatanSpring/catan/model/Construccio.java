@@ -19,7 +19,7 @@ public abstract class Construccio {
 	@JoinColumn(name = "id_jugador", nullable = false)
 	private Jugador jugador;
 
-	// Constructor
+	// Constructor Hibernate
 	public Construccio() {
 	}
 

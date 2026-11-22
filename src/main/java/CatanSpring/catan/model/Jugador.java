@@ -1,10 +1,8 @@
 package CatanSpring.catan.model;
 
-import CatanSpring.catan.model.*;
 import CatanSpring.model.enums.ColorJugador;
 import CatanSpring.model.enums.TipusRecurs;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.*;
@@ -80,7 +78,7 @@ public class Jugador {
 	private List<CartaDesenvolupament> ma = new ArrayList<>();
 
 
-	// constructor buit per a Hibernate
+	// constructor Hibernate
 	public Jugador() {
 	}
 
@@ -90,7 +88,7 @@ public class Jugador {
 		this.ordreTorn = ordreTorn;
 	}
 
-	//Get Set
+	// Getters i setters
 	public Integer getId() {
 		return id;
 	}
@@ -163,7 +161,6 @@ public class Jugador {
 		this.ma = ma;
 	}
 
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(cavallersJugats, colorJugador, id, nom, ordreTorn);
@@ -180,6 +177,4 @@ public class Jugador {
 		return "Jugador [id=" + id + ", nom=" + nom + ", colorJugador=" + colorJugador + ", ordreTorn=" + ordreTorn
 				+ ", cavallersJugats=" + cavallersJugats + "]";
 	}
-
-
 }

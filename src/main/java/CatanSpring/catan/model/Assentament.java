@@ -1,12 +1,7 @@
 package CatanSpring.catan.model;
 
-import CatanSpring.catan.model.Construccio;
 import jakarta.persistence.*;
 
-import java.util.Objects;
-
-//S'utilitza SINGLE TABLE per a les subclasses de Carretera i Assentament --> NO ES POT BARREJAR SINGLE TABLE AMB JOINED, PARTEIXEN DE CONSTRUCCIO, QUE FA SERVIR JOINED (REVISAR!!)
-// de moment he tret la single table perque tampoc fa res
 @Entity
 @Table(name = "assentament")
 public abstract class Assentament extends Construccio {
