@@ -223,6 +223,11 @@ public class JugadorService {
 	            }
 	        } 
 	    }
+	    
+	    
+	    if (jugador.getPartida_id().getEstatPartida() == EstatPartida.EN_CURS && !jugador.getPartida_id().isDausTirats()) {
+	        return ResponseEntity.status(HttpStatus.CONFLICT).body("Has de tirar els daus abans de construir");
+	    }
 		
 		// deleguem el proces a diferents funcions segons el tipus de construccio escollida
 		if (request.getTipus().toUpperCase().equals("CARRETERA")) {

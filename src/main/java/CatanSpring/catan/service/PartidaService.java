@@ -19,6 +19,7 @@ import CatanSpring.model.enums.TipusRecurs;
 import CatanSpring.model.enums.TipusTerreny;
 import CatanSpring.model.gestioFitxers.ImportarFitxer;
 import CatanSpring.catan.dto.TaulerHexagonResponse;
+import CatanSpring.catan.dto.TiradaDausResponse;
 import CatanSpring.catan.repository.HexagonRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -244,7 +245,7 @@ public class PartidaService {
 	}
 
 	@Transactional
-	public ResponseEntity<PartidaResponse> tirarDaus(Integer idPartida) {
+	public ResponseEntity<TiradaDausResponse> tirarDaus(Integer idPartida) {
 	    
 		Partida partida = repo.findById(idPartida).orElse(null);
 
@@ -256,6 +257,12 @@ public class PartidaService {
 	    //Si la partida no es troba en curs, aquesta llança un error 400
 	    if (partida.getEstatPartida() != EstatPartida.EN_CURS) {
 	        return ResponseEntity.badRequest().header("Info-Catan", "La partida no es troba en curs").build();
+	    }
+	    
+	    
+	    //Si la partida no té jugadors actius, retorna un error 400.
+	    if(partida.getActiu() == null) {
+	    	return ResponseEntity.badRequest().header("Info-catan", "No hi ha cap jugador actiu.").build();
 	    }
 
 	    //Si ja s'han llançat els daus a la partida, llança també un error 404.
@@ -275,6 +282,11 @@ public class PartidaService {
 	    //Es guarda el resultat dels daus i s'indica que ja s'han llançat els daus.
 	    partida.setUltimaTirada(tirada);
 	    partida.setDausTirats(true);
+	    
+	    //Si la tirada resulta en 7, marquem el lladre. 
+	    if(tirada == 7) {
+	    	partida.setLladrePendent(true);
+	    } 
 	    
 	    // Si sortis el nombre 7, no es podria generar recursos.
 	    if(tirada != 7) {
@@ -335,26 +347,9 @@ public class PartidaService {
 	    }
 	    
 	    // Retornem les dades actualitzades de la partida.
-	    return ResponseEntity.ok(PartidaResponse.de(partida));
+	    return ResponseEntity.ok(TiradaDausResponse.de(partida));
 
 	}
-	
-	// LEED EL COMENTARIO --> Probablemente si lo probais en el swagger, os dará 400, (BAD REQUEST).
-	
-	// Forzad a que la partida esté en curso (EN_CURS) (Hacedlo en MYSQL Workbench o el DBeaver para verlo). 
-	// Además, comprovad que dausTirats es false, basicamente porque si ya habeis "tirado", este pasara a true y 
-	// os volverá a saltar BAD_REQUEST, no porque este mal si no porque no puedes tirar más de 2 veces.
-	
-	// ------------------------------------------------------------------------------------------------------------
-	
-	// UPDATE partida
-	// SET estat_partida = 'EN_CURS', daus_tirats = FALSE
-	// WHERE id = 1;
-	
-	//Si ejecutais después de esto, os debería de salir 200 (OK). Cuando modifiqueis la base de datos, acordaos de volver a ejecutar el CatanApplication 
-	
-	// TODAVIA NO ESTA ACABADO porque se tiene que implementar lo de las construcciones y lo de pasar turno. 
-	
 	
 	
 }

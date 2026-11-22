@@ -2,6 +2,7 @@ package CatanSpring.catan.controller;
 
 import CatanSpring.catan.dto.PartidaResponse;
 import CatanSpring.catan.dto.TaulerHexagonResponse;
+import CatanSpring.catan.dto.TiradaDausResponse;
 import CatanSpring.catan.service.PartidaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class PartidaController {
 	}
 	
 	@PostMapping("/{idPartida}/daus")
-	public ResponseEntity<PartidaResponse> tirarDaus(@PathVariable Integer idPartida) {
+	public ResponseEntity<TiradaDausResponse> tirarDaus(@PathVariable Integer idPartida) {
 	    return partidaService.tirarDaus(idPartida);
 	}
 }
